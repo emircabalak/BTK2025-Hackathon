@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Münazara Arenası</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .dark body { background-color: #111827; }
+        
+        /* Yazı renkleri ve kontrast düzenlemeleri */
+        .text-contrast { color: #1f2937; }
+        .dark .text-contrast { color: #f9fafb; }
+        .text-subtle { color: #4b5563; }
+        .dark .text-subtle { color: #9ca3af; }
+        
+        /* Ay ikonu hizalama düzeltmesi */
+        .moon-icon { transform: translate(-0.5px, 0); }
+        
+        /* Toggle düğmesi ve ikon düzenlemeleri */
+        .theme-toggle-circle {
+            transition: transform 0.3s ease-in-out;
+        }
+        .theme-toggle-circle.light {
+            transform: translateX(0);
+        }
+        .theme-toggle-circle.dark {
+            transform: translateX(36px);
+        }
+        
+        /* Diğer stiller */
+        #schema-container svg { width: 100%; height: auto; }
+        .header-bg-light { background-color: rgba(255, 255, 255, 0.8); }
+        .dark .header-bg-light { background-color: rgba(31, 41, 55, 0.8); }
+        .bg-debate-light { background-color: #ffffff; }
+        .dark .bg-debate-light { background-color: #1f2937; }
+        .card-bg { background-color: #f3f4f6; }
+        .dark .card-bg { background-color: #374151; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="text-contrast transition-colors duration-300">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div id="app-container" class="w-full max-w-2xl mx-auto bg-debate-light rounded-2xl shadow-lg flex flex-col" style="height: 90vh; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+            <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between header-bg-light backdrop-blur-sm">
+                <div class="flex items-center space-x-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500">
+                        <path d="M12 2a2.5 2.5 0 0 1 2.5 2.5v.75a2.5 2.5 0 0 1-5 0v-.75A2.5 2.5 0 0 1 12 2Z"/>
+                        <path d="M4.5 9.5A2.5 2.5 0 0 0 7 12v0a2.5 2.5 0 0 0-2.5 2.5v0A2.5 2.5 0 0 0 7 17v0a2.5 2.5 0 0 0-2.5 2.5v0"/>
+                        <path d="M19.5 9.5A2.5 2.5 0 0 1 17 12v0a2.5 2.5 0 0 1 2.5 2.5v0A2.5 2.5 0 0 1 17 17v0a2.5 2.5 0 0 1 2.5 2.5v0"/>
+                        <path d="M12 12a2.5 2.5 0 0 0-2.5-2.5v0A2.5 2.5 0 0 0 7 7v0"/>
+                        <path d="M12 12a2.5 2.5 0 0 1 2.5-2.5v0A2.5 2.5 0 0 1 17 7v0"/>
+                        <path d="M12 12a2.5 2.5 0 0 0-2.5 2.5v0A2.5 2.5 0 0 0 7 17v0"/>
+                        <path d="M12 12a2.5 2.5 0 0 1 2.5 2.5v0A2.5 2.5 0 0 1 17 17v0"/>
+                        <path d="M12 4.75v3.5"/>
+                        <path d="M7 9.5h10"/>
+                        <path d="M7 14.5h10"/>
+                        <path d="M12 17.25v3.5"/>
+                    </svg>
+                    <div>
+                        <h1 data-lang-key="appTitle" class="text-xl font-bold">Münazara Arenası</h1>
+                        <p data-lang-key="appSubtitle" class="text-sm text-subtle">Python & Flask Versiyonu</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button data-action="toggle-theme" id="theme-toggle" type="button" class="relative p-1.5 w-[72px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center transition-colors duration-300 ease-in-out">
+                        <span id="toggle-circle" class="theme-toggle-circle light w-8 h-8 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
+                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
+                                <circle cx="12" cy="12" r="5"/>
+                                <path d="M12 1v2"/>
+                                <path d="M12 21v2"/>
+                                <path d="m4.22 4.22 1.42 1.42"/>
+                                <path d="m18.36 18.36 1.42 1.42"/>
+                                <path d="M1 12h2"/>
+                                <path d="M21 12h2"/>
+                                <path d="m4.22 19.78 1.42-1.42"/>
+                                <path d="m18.36 5.64 1.42-1.42"/>
+                            </svg>
+                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 hidden moon-icon">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </span>
+                    </button>
+                    <button data-action="toggle-lang" class="text-sm font-semibold text-subtle hover:text-cyan-500">EN</button>
+                </div>
+            </header>
+            
+            <main class="flex-grow p-6 overflow-y-auto">
+                <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-sm font-medium text-subtle mb-2">1. Bir Münazara Konusu Seçin</label>
+                            <select id="topic-select" class="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
+                                <option value="" disabled selected data-lang-key="topicSelectPlaceholder">Konu seç...</option>
+                                <option value="Yapay zeka insanlık için bir tehdit mi?" data-lang-key="topic1">Yapay zeka insanlık için bir tehdit mi?</option>
+                                <option value="Üniversite eğitimi herkes için ücretsiz mi olmalı?" data-lang-key="topic2">Üniversite eğitimi herkes için ücretsiz mi olmalı?</option>
+                                <option value="Sosyal medya toplumu olumlu yönde mi etkiliyor?" data-lang-key="topic3">Sosyal medya toplumu olumlu yönde mi etkiliyor?</option>
+                                <option value="custom" data-lang-key="topicCustom">Kendi konumu yazmak istiyorum...</option>
+                            </select>
+                        </div>
+                        <div id="custom-topic-container" class="hidden">
+                            <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                        </div>
+                        <div>
+                            <h3 data-lang-key="stanceSelectLabel" class="block text-sm font-medium text-subtle mb-2">2. Tarafınızı Belirleyin</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button data-action="set-stance" data-stance="savunuyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                    <span data-lang-key="stanceFor">Savunuyorum</span>
+                                </button>
+                                <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                    <span data-lang-key="stanceAgainst">Karşı Çıkıyorum</span>
+                                </button>
+                            </div>
+                        </div>
+                        <p id="error-message" class="text-red-500 dark:text-red-400 text-sm text-center"></p>
+                        <button data-action="start-debate" id="start-debate-btn" class="w-full p-4 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-bold text-white text-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg" disabled>
+                            <span data-lang-key="startDebate">Münazarayı Başlat</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="debate-screen" class="hidden flex flex-col h-full">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 header-bg-light backdrop-blur-sm -mx-6 -mt-6 mb-4 sticky top-0 z-10">
+                        <h3 id="debate-topic-header" class="text-center font-semibold text-subtle"><span data-lang-key="topicLabel">Konu</span>: <span class="text-cyan-600 dark:text-cyan-400"></span></h3>
+                    </div>
+                    <div id="messages-container" class="flex-grow overflow-y-auto pr-4 -mr-4 space-y-6">
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                            <button data-action="send-message" id="send-btn" class="p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none">
+                                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                                    <path d="M22 2 11 13"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button data-action="end-debate" id="end-debate-btn" class="w-full mt-3 p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow-md hover:shadow-lg">
+                            <span data-lang-key="endDebate">Münazarayı Bitir ve Rapor Al</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="report-screen" class="hidden flex flex-col h-full justify-center animate-fade-in">
+                </div>
+                
+                <div id="schema-screen" class="hidden flex flex-col h-full">
+                    <h2 data-lang-key="schemaTitle" class="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-4">Argüman Haritası</h2>
+                    <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-4 rounded-lg overflow-auto">
+                    </div>
+                    <div class="mt-4">
+                        <button data-action="back-to-report" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg">
+                            <span data-lang-key="backToReport">Rapora Geri Dön</span>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <div id="pdf-render-container" style="position: absolute; top: 0; left: -9999px; background-color: #111827; padding: 20px;"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const state = {
+                topic: '',
+                stance: '',
+                messages: [],
+                lang: 'tr',
+                theme: 'light'
+            };
+
+            const translations = {
+                tr: {
+                    appTitle: "Münazara Arenası",
+                    appSubtitle: "Python & Flask Versiyonu",
+                    topicSelectLabel: "1. Bir Münazara Konusu Seçin",
+                    topicSelectPlaceholder: "Konu seç...",
+                    topic1: "Yapay zeka insanlık için bir tehdit mi?",
+                    topic2: "Üniversite eğitimi herkes için ücretsiz mi olmalı?",
+                    topic3: "Sosyal medya toplumu olumlu yönde mi etkiliyor?",
+                    topicCustom: "Kendi konumu yazmak istiyorum...",
+                    customTopicPlaceholder: "Münazara konunuzu buraya yazın",
+                    stanceSelectLabel: "2. Tarafınızı Belirleyin",
+                    stanceFor: "Savunuyorum",
+                    stanceAgainst: "Karşı Çıkıyorum",
+                    startDebate: "Münazarayı Başlat",
+                    topicLabel: "Konu",
+                    messagePlaceholder: "Argümanınızı yazın...",
+                    endDebate: "Münazarayı Bitir ve Rapor Al",
+                    reportTitle: "Performans Raporu",
+                    scoreLabel: "İkna Edicilik Puanı",
+                    strongestArgument: "En Güçlü Argümanınız",
+                    improvementArea: "Geliştirilmesi Gereken Nokta",
+                    exampleSentence: "Örnek Cümleniz",
+                    suggestion: "Öneri",
+                    evidenceUsage: "Kanıt Kullanımı ve Destekleme",
+                    generalComment: "Genel Yorum",
+                    drawSchema: "Argüman Haritasını Çiz",
+                    downloadPDF: "Raporu ve Haritayı İndir",
+                    newDebate: "Yeni Münazara Başlat",
+                    schemaTitle: "Argüman Haritası",
+                    backToReport: "Rapora Geri Dön",
+                    pdfLoading: "PDF oluşturuluyor...",
+                    errorTopic: "Lütfen bir konu ve taraf seçin.",
+                    errorSendMessage: "Mesaj gönderilemedi",
+                    errorReport: "Rapor oluşturulamadı",
+                    errorSchema: "Şema verisi sunucudan alınamadı.",
+                    errorSchemaInvalid: "Yapay zeka geçerli bir şema formatı döndürmedi.",
+                    errorSchemaRender: "Argüman haritası çizilirken bir hata oluştu.",
+                    errorPDF: "PDF oluşturulurken bir hata oluştu"
+                },
+                en: {
+                    appTitle: "Debate Arena",
+                    appSubtitle: "Python & Flask Version",
+                    topicSelectLabel: "1. Select a Debate Topic",
+                    topicSelectPlaceholder: "Select a topic...",
+                    topic1: "Is artificial intelligence a threat to humanity?",
+                    topic2: "Should university education be free for everyone?",
+                    topic3: "Does social media positively affect society?",
+                    topicCustom: "I want to write my own topic...",
+                    customTopicPlaceholder: "Write your debate topic here",
+                    stanceSelectLabel: "2. Choose Your Stance",
+                    stanceFor: "I'm For",
+                    stanceAgainst: "I'm Against",
+                    startDebate: "Start Debate",
+                    topicLabel: "Topic",
+                    messagePlaceholder: "Write your argument...",
+                    endDebate: "End Debate & Get Report",
+                    reportTitle: "Performance Report",
+                    scoreLabel: "Persuasiveness Score",
+                    strongestArgument: "Your Strongest Argument",
+                    improvementArea: "Area for Improvement",
+                    exampleSentence: "Your Example Sentence",
+                    suggestion: "Suggestion",
+                    evidenceUsage: "Use of Evidence and Support",
+                    generalComment: "General Feedback",
+                    drawSchema: "Draw Argument Map",
+                    downloadPDF: "Download Report & Map",
+                    newDebate: "Start New Debate",
+                    schemaTitle: "Argument Map",
+                    backToReport: "Back to Report",
+                    pdfLoading: "Generating PDF...",
+                    errorTopic: "Please select a topic and a stance.",
+                    errorSendMessage: "Could not send message",
+                    errorReport: "Could not generate report",
+                    errorSchema: "Could not fetch schema data from server.",
+                    errorSchemaInvalid: "AI did not return a valid schema format.",
+                    errorSchemaRender: "An error occurred while drawing the argument map.",
+                    errorPDF: "An error occurred while generating the PDF"
+                }
+            };
+            
+            const screens = {
+                topic: document.getElementById('topic-screen'),
+                debate: document.getElementById('debate-screen'),
+                report: document.getElementById('report-screen'),
+                schema: document.getElementById('schema-screen')
+            };
+            const topicSelect = document.getElementById('topic-select');
+            const customTopicContainer = document.getElementById('custom-topic-container');
+            const customTopicInput = document.getElementById('custom-topic-input');
+            const startDebateBtn = document.getElementById('start-debate-btn');
+            const errorMessage = document.getElementById('error-message');
+            const debateTopicHeader = document.getElementById('debate-topic-header').querySelector('span');
+            const messagesContainer = document.getElementById('messages-container');
+            const messageInput = document.getElementById('message-input');
+            const toggleCircle = document.getElementById('toggle-circle');
+            
+            function setLanguage(lang) {
+                state.lang = lang;
+                localStorage.setItem('lang', lang);
+                document.documentElement.lang = lang;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    const translation = translations[lang][key];
+                    if (translation) {
+                        if (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA') {
+                            if (el.placeholder) el.placeholder = translation;
+                        } else {
+                            el.textContent = translation;
+                        }
+                    }
+                });
+                const langToggler = document.querySelector('[data-action="toggle-lang"]');
+                if(langToggler) langToggler.textContent = lang === 'tr' ? 'EN' : 'TR';
+            }
+
+            function setTheme(theme) {
+                state.theme = theme;
+                localStorage.setItem('theme', theme);
+                const lightIcon = document.getElementById('theme-icon-light');
+                const darkIcon = document.getElementById('theme-icon-dark');
+
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    toggleCircle.classList.remove('light');
+                    toggleCircle.classList.add('dark');
+                    lightIcon.classList.add('hidden');
+                    darkIcon.classList.remove('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    toggleCircle.classList.remove('dark');
+                    toggleCircle.classList.add('light');
+                    lightIcon.classList.remove('hidden');
+                    darkIcon.classList.add('hidden');
+                }
+                mermaid.initialize({ startOnLoad: false, theme: state.theme });
+            }
+
+            function showScreen(screenName) {
+                Object.values(screens).forEach(s => s.classList.add('hidden'));
+                screens[screenName].classList.remove('hidden');
+            }
+
+            function updateMessages() {
+                if (!messagesContainer) return;
+                messagesContainer.innerHTML = state.messages.map(msg => `
+                    <div class="flex items-start gap-3 animate-fade-in ${msg.author === 'user' ? 'justify-end' : 'justify-start'}">
+                        ${msg.author === 'ai' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>' : ''}
+                        <div class="max-w-md p-3 rounded-xl ${msg.author === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 text-contrast rounded-bl-none'}">
+                            <p class="text-sm" style="white-space: pre-wrap;">${msg.text}</p>
+                        </div>
+                        ${msg.author === 'user' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 dark:text-gray-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' : ''}
+                    </div>
+                `).join('');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function addMessage(author, text) {
+                state.messages.push({ author, text });
+                updateMessages();
+            }
+
+            function setLoading(isLoading, message = '') {
+                document.querySelectorAll('[data-action]').forEach(el => el.disabled = isLoading);
+                if(messageInput) messageInput.disabled = isLoading;
+
+                let loadingEl = document.getElementById('loading-indicator');
+                if (isLoading) {
+                    if (!loadingEl) {
+                        loadingEl = document.createElement('div');
+                        loadingEl.id = 'loading-indicator';
+                        loadingEl.innerHTML = `
+                            <div class="flex items-start gap-3 justify-start">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>
+                                <div class="max-w-md p-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-contrast rounded-bl-none">
+                                    <div class="flex items-center space-x-2"><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></div></div>
+                                    ${message ? `<p class="text-sm ml-2">${message}</p>` : ''}
+                                </div>
+                            </div>`;
+                        messagesContainer.appendChild(loadingEl);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }
+                } else {
+                    if (loadingEl) loadingEl.remove();
+                }
+            }
+
+            function renderReportScreen(report) {
+                const score = report.iknaEdicilikPuani || 0;
+                screens.report.innerHTML = `
+                    <div id="report-content" class="space-y-6">
+                        <h2 data-lang-key="reportTitle" class="text-3xl font-bold text-center text-cyan-600 dark:text-cyan-400">Performans Raporu</h2>
+                        <div class="relative flex justify-center items-center">
+                            <svg class="transform -rotate-90" width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-700" stroke-width="12" />
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-cyan-500" stroke-width="12" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - (score / 10)}" />
+                            </svg>
+                            <span class="absolute text-3xl font-bold">${score}<span class="text-lg">/10</span></span>
+                        </div>
+                        <p data-lang-key="scoreLabel" class="text-center text-lg font-semibold text-subtle">İkna Edicilik Puanı</p>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                <h3 data-lang-key="strongestArgument" class="font-semibold text-green-600 dark:text-green-400 mb-2">En Güçlü Argümanınız</h3>
+                                <p class="text-sm">${report.enGucluArguman || '...'}</p>
+                            </div>
+                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                <h3 class="font-semibold text-yellow-600 dark:text-yellow-400 mb-2"><span data-lang-key="improvementArea">Geliştirilmesi Gereken Nokta</span>: ${report.gelistirilmesiGerekenNokta?.tespitEdilenHataTuru || 'Genel'}</h3>
+                                <p class="text-sm text-subtle mt-1 mb-2"><em>${report.gelistirilmesiGerekenNokta?.hataTanimi || ''}</em></p>
+                                <p class="text-sm border-l-4 border-yellow-500 dark:border-yellow-400 pl-3"><strong><span data-lang-key="exampleSentence">Örnek Cümleniz</span>:</strong> "${report.gelistirilmesiGerekenNokta?.ornekCumle || '...'}"</p>
+                                <p class="text-sm mt-2"><strong><span data-lang-key="suggestion">Öneri</span>:</strong> ${report.gelistirilmesiGerekenNokta?.onerilenGelistirme || '...'}</p>
+                            </div>
+                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                <h3 data-lang-key="evidenceUsage" class="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Kanıt Kullanımı ve Destekleme</h3>
+                                <p class="text-sm">${report.kanitKullanimi || '...'}</p>
+                            </div>
+                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                <h3 data-lang-key="generalComment" class="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Genel Yorum</h3>
+                                <p class="text-sm">${report.genelYorum || '...'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 space-y-3">
+                        <button data-action="draw-schema" class="w-full p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="drawSchema">Argüman Haritasını Çiz</span></button>
+                        <button data-action="download-pdf" class="w-full p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="downloadPDF">Raporu ve Haritayı İndir</span></button>
+                        <button data-action="new-debate" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="newDebate">Yeni Münazara Başlat</span></button>
+                    </div>
+                `;
+                setLanguage(state.lang);
+            }
+
+            function checkCanStart() {
+                const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
+                startDebateBtn.disabled = !finalTopic || !state.stance;
+            }
+
+            async function handleAction(event) {
+                const target = event.target.closest('[data-action]');
+                if (!target || target.disabled) return;
+
+                const action = target.dataset.action;
+
+                if (action === 'toggle-theme') {
+                    setTheme(state.theme === 'dark' ? 'light' : 'dark');
+                }
+
+                if (action === 'toggle-lang') {
+                    setLanguage(state.lang === 'tr' ? 'en' : 'tr');
+                }
+
+                if (action === 'set-stance') {
+                    state.stance = target.dataset.stance;
+                    document.querySelectorAll('[data-action="set-stance"]').forEach(btn => btn.classList.remove('bg-green-500', 'dark:bg-green-600', 'ring-2', 'ring-green-400', 'bg-red-500', 'dark:bg-red-600', 'ring-red-400', 'text-white'));
+                    target.classList.add(state.stance === 'savunuyorum' ? 'bg-green-500' : 'bg-red-500', state.stance === 'savunuyorum' ? 'dark:bg-green-600' : 'dark:bg-red-600', 'ring-2', state.stance === 'savunuyorum' ? 'ring-green-400' : 'ring-red-400', 'text-white');
+                    checkCanStart();
+                }
+
+                if (action === 'start-debate') {
+                    const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
+                    if (!finalTopic || !state.stance) {
+                        errorMessage.textContent = translations[state.lang].errorTopic;
+                        return;
+                    }
+                    state.topic = finalTopic;
+                    state.messages = [];
+                    debateTopicHeader.textContent = state.topic;
+                    updateMessages();
+                    showScreen('debate');
+                }
+
+                if (action === 'send-message') {
+                    const text = messageInput.value.trim();
+                    if (!text) return;
+                    addMessage('user', text);
+                    messageInput.value = '';
+                    setLoading(true);
+                    try {
+                        const response = await fetch('/api/debate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || 'Unknown server error');
+                        addMessage('ai', data.reply);
+                    } catch (error) {
+                        addMessage('ai', `${translations[state.lang].errorSendMessage}: ${error.message}`);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                if (action === 'end-debate') {
+                    setLoading(true);
+                    try {
+                        const response = await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const report = await response.json();
+                        if (!response.ok) throw new Error(report.error || 'Unknown server error');
+                        renderReportScreen(report);
+                        showScreen('report');
+                    } catch (error) {
+                         addMessage('ai', `${translations[state.lang].errorReport}: ${error.message}`);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                if (action === 'new-debate') {
+                    showScreen('topic');
+                }
+                
+                if (action === 'back-to-report') {
+                    showScreen('report');
+                }
+
+                if (action === 'draw-schema') {
+                    setLoading(true);
+                    const schemaContainer = document.getElementById('schema-container');
+                    let schemaData = '';
+                    try {
+                        const response = await fetch('/api/schema', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || translations[state.lang].errorSchema);
+                        
+                        schemaData = data.schema;
+                        if (!schemaData || !schemaData.trim().startsWith('graph')) {
+                           throw new Error(translations[state.lang].errorSchemaInvalid);
+                        }
+                        
+                        const { svg } = await mermaid.render('mermaid-graph', schemaData);
+                        schemaContainer.innerHTML = svg;
+                        
+                        showScreen('schema');
+                    } catch (error) {
+                         console.error("Mermaid render error:", error);
+                         schemaContainer.innerHTML = `
+                            <p class="text-yellow-400 mb-2">${translations[state.lang].errorSchemaRender}</p>
+                            <p class="text-gray-400 text-sm mb-2">Hata Detayı: ${error.message}</p>
+                            <p class="text-gray-400 text-sm mb-2 mt-4">Alınan Ham Veri:</p>
+                            <pre class="bg-black p-4 rounded text-white text-sm whitespace-pre-wrap">${schemaData || '(Veri alınamadı)'}</pre>
+                         `;
+                         showScreen('schema');
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                if (action === 'download-pdf') {
+                    setLoading(true, translations[state.lang].pdfLoading);
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+                        const reportContent = document.getElementById('report-content');
+                        const reportCanvas = await html2canvas(reportContent, { backgroundColor: state.theme === 'dark' ? '#1f2937' : '#ffffff', scale: 2 });
+                        const reportImgData = reportCanvas.toDataURL('image/png');
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const reportImgProps = pdf.getImageProperties(reportImgData);
+                        const reportImgHeight = (reportImgProps.height * pdfWidth) / reportImgProps.width;
+                        pdf.addImage(reportImgData, 'PNG', 0, 0, pdfWidth, reportImgHeight);
+
+                        const schemaResponse = await fetch('/api/schema', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const schemaData = await schemaResponse.json();
+                        if (!schemaResponse.ok) throw new Error(schemaData.error || translations[state.lang].errorSchema);
+
+                        const renderContainer = document.getElementById('pdf-render-container');
+                        const { svg } = await mermaid.render('temp-mermaid-graph-id', schemaData.schema);
+                        renderContainer.innerHTML = svg;
+                        
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+
+                        const schemaCanvas = await html2canvas(renderContainer, { backgroundColor: state.theme === 'dark' ? '#111827' : '#ffffff', scale: 2 });
+                        const schemaImgData = schemaCanvas.toDataURL('image/png');
+                        const schemaImgProps = pdf.getImageProperties(schemaImgData);
+                        const schemaImgHeight = (schemaImgProps.height * pdfWidth) / schemaImgProps.width;
+
+                        pdf.addPage();
+                        pdf.addImage(schemaImgData, 'PNG', 0, 0, pdfWidth, schemaImgHeight);
+                        
+                        renderContainer.innerHTML = '';
+                        pdf.save('munazara-raporu.pdf');
+
+                    } catch (error) {
+                        console.error("PDF Oluşturma Hatası:", error);
+                        alert(`${translations[state.lang].errorPDF}: ${error.message}`);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            }
+
+            const savedLang = localStorage.getItem('lang') || 'tr';
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            
+            mermaid.initialize({ startOnLoad: false, theme: savedTheme });
+            document.body.addEventListener('click', handleAction);
+            topicSelect.addEventListener('change', () => {
+                customTopicContainer.classList.toggle('hidden', topicSelect.value !== 'custom');
+                checkCanStart();
+            });
+            customTopicInput.addEventListener('input', checkCanStart);
+            messageInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter' && !document.querySelector('[data-action="send-message"]').disabled) {
+                    handleAction({ target: document.querySelector('[data-action="send-message"]') });
+                }
+            });
+            
+            setLanguage(savedLang);
+            setTheme(savedTheme);
+            showScreen('topic');
+        });
+    </script>
+</body>
+</html>
