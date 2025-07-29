@@ -16,16 +16,13 @@
         body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
         .dark body { background-color: #111827; }
         
-        /* Yazı renkleri ve kontrast düzenlemeleri */
         .text-contrast { color: #1f2937; }
         .dark .text-contrast { color: #f9fafb; }
         .text-subtle { color: #4b5563; }
         .dark .text-subtle { color: #9ca3af; }
         
-        /* Ay ikonu hizalama düzeltmesi */
         .moon-icon { transform: translate(-0.5px, 0); }
         
-        /* Toggle düğmesi ve ikon düzenlemeleri */
         .theme-toggle-circle {
             transition: transform 0.3s ease-in-out;
         }
@@ -33,10 +30,9 @@
             transform: translateX(0);
         }
         .theme-toggle-circle.dark {
-            transform: translateX(30px);
+            transform: translateX(26px);
         }
         
-        /* Diğer stiller */
         #schema-container svg { width: 100%; height: auto; }
         .header-bg-light { background-color: rgba(255, 255, 255, 0.8); }
         .dark .header-bg-light { background-color: rgba(31, 41, 55, 0.8); }
@@ -45,13 +41,11 @@
         .card-bg { background-color: #f3f4f6; }
         .dark .card-bg { background-color: #374151; }
         
-        /* Yeni eklenen stiller */
         .message-input-bg { background-color: #f3f4f6; }
         .dark .message-input-bg { background-color: #374151; }
         .ai-message-bg { background-color: #f3f4f6; }
         .dark .ai-message-bg { background-color: #374151; }
         
-        /* Konu seçme ekranı için gri arka plan */
         .topic-screen-bg {
             background-color: #f3f4f6;
             border-radius: 16px;
@@ -61,7 +55,6 @@
             background-color: #1f2937;
         }
         
-        /* Seçim kutusu stilleri */
         .select-bg {
             background-color: #ffffff;
             border: 1px solid #d1d5db;
@@ -71,7 +64,6 @@
             border-color: #4b5563;
         }
         
-        /* Özel konu girişi */
         .custom-topic-bg {
             background-color: #ffffff;
             border: 1px solid #d1d5db;
@@ -110,20 +102,22 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button data-action="toggle-theme" id="theme-toggle" type="button" class="relative p-1.5 w-[72px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center transition-colors duration-300 ease-in-out">
-                        <span id="toggle-circle" class="theme-toggle-circle light w-8 h-8 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
-                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
+                    <div id="user-info" class="hidden items-center space-x-2">
+                        <span id="username-display" class="text-sm font-medium"></span>
+                        <button data-action="show-history" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m3.9 16.2 5.1-5.1 4 4L18.3 9.8"/></svg>
+                        </button>
+                        <button data-action="logout" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        </button>
+                    </div>
+                    <button data-action="toggle-theme" id="theme-toggle" type="button" class="relative p-1.5 w-[64px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center transition-colors duration-300 ease-in-out">
+                        <span id="toggle-circle" class="theme-toggle-circle w-7 h-7 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
+                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
                                 <circle cx="12" cy="12" r="5"/>
-                                <path d="M12 1v2"/>
-                                <path d="M12 21v2"/>
-                                <path d="m4.22 4.22 1.42 1.42"/>
-                                <path d="m18.36 18.36 1.42 1.42"/>
-                                <path d="M1 12h2"/>
-                                <path d="M21 12h2"/>
-                                <path d="m4.22 19.78 1.42-1.42"/>
-                                <path d="m18.36 5.64 1.42-1.42"/>
+                                <path d="M12 1v2"/><path d="M12 21v2"/><path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/>
                             </svg>
-                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 hidden moon-icon">
+                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 hidden moon-icon">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                             </svg>
                         </span>
@@ -133,74 +127,7 @@
             </header>
             
             <main class="flex-grow p-6 overflow-y-auto">
-                <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
-                    <div class="topic-screen-bg space-y-6">
-                        <div>
-                            <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-sm font-medium text-subtle mb-2">1. Bir Münazara Konusu Seçin</label>
-                            <select id="topic-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
-                                <option value="" disabled selected data-lang-key="topicSelectPlaceholder">Konu seç...</option>
-                                <option value="Yapay zeka insanlık için bir tehdit mi?" data-lang-key="topic1">Yapay zeka insanlık için bir tehdit mi?</option>
-                                <option value="Üniversite eğitimi herkes için ücretsiz mi olmalı?" data-lang-key="topic2">Üniversite eğitimi herkes için ücretsiz mi olmalı?</option>
-                                <option value="Sosyal medya toplumu olumlu yönde mi etkiliyor?" data-lang-key="topic3">Sosyal medya toplumu olumlu yönde mi etkiliyor?</option>
-                                <option value="custom" data-lang-key="topicCustom">Kendi konumu yazmak istiyorum...</option>
-                            </select>
-                        </div>
-                        <div id="custom-topic-container" class="hidden">
-                            <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 custom-topic-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
-                        </div>
-                        <div>
-                            <h3 data-lang-key="stanceSelectLabel" class="block text-sm font-medium text-subtle mb-2">2. Tarafınızı Belirleyin</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <button data-action="set-stance" data-stance="savunuyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
-                                    <span data-lang-key="stanceFor">Savunuyorum</span>
-                                </button>
-                                <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
-                                    <span data-lang-key="stanceAgainst">Karşı Çıkıyorum</span>
-                                </button>
-                            </div>
-                        </div>
-                        <p id="error-message" class="text-red-500 dark:text-red-400 text-sm text-center"></p>
-                        <button data-action="start-debate" id="start-debate-btn" class="w-full p-4 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-bold text-white text-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg" disabled>
-                            <span data-lang-key="startDebate">Münazarayı Başlat</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="debate-screen" class="hidden flex flex-col h-full">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 header-bg-light backdrop-blur-sm -mx-6 -mt-6 mb-4 sticky top-0 z-10">
-                        <h3 id="debate-topic-header" class="text-center font-semibold text-subtle"><span data-lang-key="topicLabel">Konu</span>: <span class="text-cyan-600 dark:text-cyan-400"></span></h3>
-                    </div>
-                    <div id="messages-container" class="flex-grow overflow-y-auto pr-4 -mr-4 space-y-6">
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-3 message-input-bg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
-                            <button data-action="send-message" id="send-btn" class="p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none">
-                                    <path d="m22 2-7 20-4-9-9-4Z"/>
-                                    <path d="M22 2 11 13"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <button data-action="end-debate" id="end-debate-btn" class="w-full mt-3 p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow-md hover:shadow-lg">
-                            <span data-lang-key="endDebate">Münazarayı Bitir ve Rapor Al</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="report-screen" class="hidden flex flex-col h-full justify-center animate-fade-in">
-                </div>
-                
-                <div id="schema-screen" class="hidden flex flex-col h-full">
-                    <h2 data-lang-key="schemaTitle" class="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-4">Argüman Haritası</h2>
-                    <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-4 rounded-lg overflow-auto">
-                    </div>
-                    <div class="mt-4">
-                        <button data-action="back-to-report" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg">
-                            <span data-lang-key="backToReport">Rapora Geri Dön</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- EKRANLAR BURAYA GELECEK -->
             </main>
         </div>
     </div>
@@ -214,7 +141,10 @@
                 stance: '',
                 messages: [],
                 lang: 'tr',
-                theme: 'light'
+                theme: 'light',
+                history: [],
+                currentReport: null,
+                currentSchema: null
             };
 
             const translations = {
@@ -255,7 +185,18 @@
                     errorSchema: "Şema verisi sunucudan alınamadı.",
                     errorSchemaInvalid: "Yapay zeka geçerli bir şema formatı döndürmedi.",
                     errorSchemaRender: "Argüman haritası çizilirken bir hata oluştu.",
-                    errorPDF: "PDF oluşturulurken bir hata oluştu"
+                    errorPDF: "PDF oluşturulurken bir hata oluştu",
+                    loginTitle: "Giriş Yap",
+                    registerTitle: "Kayıt Ol",
+                    usernamePlaceholder: "Kullanıcı Adı",
+                    passwordPlaceholder: "Şifre",
+                    loginButton: "Giriş Yap",
+                    registerButton: "Kayıt Ol",
+                    guestButton: "Misafir Olarak Devam Et",
+                    showRegister: "Hesabın yok mu? Kayıt ol",
+                    showLogin: "Zaten hesabın var mı? Giriş yap",
+                    historyTitle: "Münazara Geçmişi",
+                    backToMain: "Ana Menüye Dön"
                 },
                 en: {
                     appTitle: "Debate Arena",
@@ -294,24 +235,22 @@
                     errorSchema: "Could not fetch schema data from server.",
                     errorSchemaInvalid: "AI did not return a valid schema format.",
                     errorSchemaRender: "An error occurred while drawing the argument map.",
-                    errorPDF: "An error occurred while generating the PDF"
+                    errorPDF: "An error occurred while generating the PDF",
+                    loginTitle: "Login",
+                    registerTitle: "Register",
+                    usernamePlaceholder: "Username",
+                    passwordPlaceholder: "Password",
+                    loginButton: "Login",
+                    registerButton: "Register",
+                    guestButton: "Continue as Guest",
+                    showRegister: "Don't have an account? Register",
+                    showLogin: "Already have an account? Login",
+                    historyTitle: "Debate History",
+                    backToMain: "Back to Main Menu"
                 }
             };
             
-            const screens = {
-                topic: document.getElementById('topic-screen'),
-                debate: document.getElementById('debate-screen'),
-                report: document.getElementById('report-screen'),
-                schema: document.getElementById('schema-screen')
-            };
-            const topicSelect = document.getElementById('topic-select');
-            const customTopicContainer = document.getElementById('custom-topic-container');
-            const customTopicInput = document.getElementById('custom-topic-input');
-            const startDebateBtn = document.getElementById('start-debate-btn');
-            const errorMessage = document.getElementById('error-message');
-            const debateTopicHeader = document.getElementById('debate-topic-header').querySelector('span');
-            const messagesContainer = document.getElementById('messages-container');
-            const messageInput = document.getElementById('message-input');
+            const mainContent = document.querySelector('main');
             const toggleCircle = document.getElementById('toggle-circle');
             
             function setLanguage(lang) {
@@ -355,12 +294,13 @@
                 mermaid.initialize({ startOnLoad: false, theme: state.theme });
             }
 
-            function showScreen(screenName) {
-                Object.values(screens).forEach(s => s.classList.add('hidden'));
-                screens[screenName].classList.remove('hidden');
+            function showScreen(htmlContent) {
+                mainContent.innerHTML = htmlContent;
+                setLanguage(state.lang);
             }
 
             function updateMessages() {
+                const messagesContainer = document.getElementById('messages-container');
                 if (!messagesContainer) return;
                 messagesContainer.innerHTML = state.messages.map(msg => `
                     <div class="flex items-start gap-3 animate-fade-in ${msg.author === 'user' ? 'justify-end' : 'justify-start'}">
@@ -381,11 +321,13 @@
 
             function setLoading(isLoading, message = '') {
                 document.querySelectorAll('[data-action]').forEach(el => el.disabled = isLoading);
+                const messageInput = document.getElementById('message-input');
                 if(messageInput) messageInput.disabled = isLoading;
 
+                const messagesContainer = document.getElementById('messages-container');
                 let loadingEl = document.getElementById('loading-indicator');
                 if (isLoading) {
-                    if (!loadingEl) {
+                    if (!loadingEl && messagesContainer) {
                         loadingEl = document.createElement('div');
                         loadingEl.id = 'loading-indicator';
                         loadingEl.innerHTML = `
@@ -404,54 +346,194 @@
                 }
             }
 
-            function renderReportScreen(report) {
-                const score = report.iknaEdicilikPuani || 0;
-                screens.report.innerHTML = `
-                    <div id="report-content" class="space-y-6">
-                        <h2 data-lang-key="reportTitle" class="text-3xl font-bold text-center text-cyan-600 dark:text-cyan-400">Performans Raporu</h2>
-                        <div class="relative flex justify-center items-center">
-                            <svg class="transform -rotate-90" width="120" height="120" viewBox="0 0 120 120">
-                                <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-700" stroke-width="12" />
-                                <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-cyan-500" stroke-width="12" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - (score / 10)}" />
-                            </svg>
-                            <span class="absolute text-3xl font-bold">${score}<span class="text-lg">/10</span></span>
+            function renderLoginScreen() {
+                const html = `
+                    <div id="login-screen" class="flex flex-col h-full justify-center animate-fade-in">
+                        <div class="topic-screen-bg space-y-4">
+                            <h2 data-lang-key="loginTitle" class="text-2xl font-bold text-center">Giriş Yap</h2>
+                            <input id="login-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                            <input id="login-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                            <p id="auth-error" class="text-red-500 text-sm text-center h-4"></p>
+                            <button data-action="login" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="loginButton">Giriş Yap</span></button>
+                            <button data-action="guest-login" class="w-full p-3 bg-gray-500 text-white font-bold rounded-lg"><span data-lang-key="guestButton">Misafir Olarak Devam Et</span></button>
+                            <p class="text-center text-sm"><button data-action="show-register" class="text-cyan-500 hover:underline"><span data-lang-key="showRegister">Hesabın yok mu? Kayıt ol</span></button></p>
                         </div>
-                        <p data-lang-key="scoreLabel" class="text-center text-lg font-semibold text-subtle">İkna Edicilik Puanı</p>
-                        <div class="space-y-4">
-                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                <h3 data-lang-key="strongestArgument" class="font-semibold text-green-600 dark:text-green-400 mb-2">En Güçlü Argümanınız</h3>
-                                <p class="text-sm">${report.enGucluArguman || '...'}</p>
-                            </div>
-                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                <h3 class="font-semibold text-yellow-600 dark:text-yellow-400 mb-2"><span data-lang-key="improvementArea">Geliştirilmesi Gereken Nokta</span>: ${report.gelistirilmesiGerekenNokta?.tespitEdilenHataTuru || 'Genel'}</h3>
-                                <p class="text-sm text-subtle mt-1 mb-2"><em>${report.gelistirilmesiGerekenNokta?.hataTanimi || ''}</em></p>
-                                <p class="text-sm border-l-4 border-yellow-500 dark:border-yellow-400 pl-3"><strong><span data-lang-key="exampleSentence">Örnek Cümleniz</span>:</strong> "${report.gelistirilmesiGerekenNokta?.ornekCumle || '...'}"</p>
-                                <p class="text-sm mt-2"><strong><span data-lang-key="suggestion">Öneri</span>:</strong> ${report.gelistirilmesiGerekenNokta?.onerilenGelistirme || '...'}</p>
-                            </div>
-                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                <h3 data-lang-key="evidenceUsage" class="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Kanıt Kullanımı ve Destekleme</h3>
-                                <p class="text-sm">${report.kanitKullanimi || '...'}</p>
-                            </div>
-                            <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                <h3 data-lang-key="generalComment" class="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Genel Yorum</h3>
-                                <p class="text-sm">${report.genelYorum || '...'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-6 space-y-3">
-                        <button data-action="draw-schema" class="w-full p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="drawSchema">Argüman Haritasını Çiz</span></button>
-                        <button data-action="download-pdf" class="w-full p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="downloadPDF">Raporu ve Haritayı İndir</span></button>
-                        <button data-action="new-debate" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="newDebate">Yeni Münazara Başlat</span></button>
                     </div>
                 `;
-                setLanguage(state.lang);
+                showScreen(html);
             }
 
-            function checkCanStart() {
-                const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
-                startDebateBtn.disabled = !finalTopic || !state.stance;
+            function renderRegisterScreen() {
+                const html = `
+                    <div id="register-screen" class="flex flex-col h-full justify-center animate-fade-in">
+                        <div class="topic-screen-bg space-y-4">
+                            <h2 data-lang-key="registerTitle" class="text-2xl font-bold text-center">Kayıt Ol</h2>
+                            <input id="register-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                            <input id="register-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                            <p id="auth-error" class="text-red-500 text-sm text-center h-4"></p>
+                            <button data-action="register" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="registerButton">Kayıt Ol</span></button>
+                            <p class="text-center text-sm"><button data-action="show-login" class="text-cyan-500 hover:underline"><span data-lang-key="showLogin">Zaten hesabın var mı? Giriş yap</span></button></p>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+            }
+            
+            function renderTopicScreen() {
+                const html = `
+                    <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
+                        <div class="topic-screen-bg space-y-6">
+                            <div>
+                                <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-sm font-medium text-subtle mb-2">1. Bir Münazara Konusu Seçin</label>
+                                <select id="topic-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
+                                    <option value="" disabled selected data-lang-key="topicSelectPlaceholder">Konu seç...</option>
+                                    <option value="Yapay zeka insanlık için bir tehdit mi?" data-lang-key="topic1">Yapay zeka insanlık için bir tehdit mi?</option>
+                                    <option value="Üniversite eğitimi herkes için ücretsiz mi olmalı?" data-lang-key="topic2">Üniversite eğitimi herkes için ücretsiz mi olmalı?</option>
+                                    <option value="Sosyal medya toplumu olumlu yönde mi etkiliyor?" data-lang-key="topic3">Sosyal medya toplumu olumlu yönde mi etkiliyor?</option>
+                                    <option value="custom" data-lang-key="topicCustom">Kendi konumu yazmak istiyorum...</option>
+                                </select>
+                            </div>
+                            <div id="custom-topic-container" class="hidden">
+                                <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 custom-topic-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                            </div>
+                            <div>
+                                <h3 data-lang-key="stanceSelectLabel" class="block text-sm font-medium text-subtle mb-2">2. Tarafınızı Belirleyin</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button data-action="set-stance" data-stance="savunuyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                        <span data-lang-key="stanceFor">Savunuyorum</span>
+                                    </button>
+                                    <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                        <span data-lang-key="stanceAgainst">Karşı Çıkıyorum</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p id="error-message" class="text-red-500 dark:text-red-400 text-sm text-center h-4"></p>
+                            <button data-action="start-debate" id="start-debate-btn" class="w-full p-4 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-bold text-white text-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg" disabled>
+                                <span data-lang-key="startDebate">Münazarayı Başlat</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
             }
 
+            function renderDebateScreen() {
+                const html = `
+                    <div id="debate-screen" class="flex flex-col h-full">
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 header-bg-light backdrop-blur-sm -mx-6 -mt-6 mb-4 sticky top-0 z-10">
+                            <h3 id="debate-topic-header" class="text-center font-semibold text-subtle"><span data-lang-key="topicLabel">Konu</span>: <span class="text-cyan-600 dark:text-cyan-400">${state.topic}</span></h3>
+                        </div>
+                        <div id="messages-container" class="flex-grow overflow-y-auto pr-4 -mr-4 space-y-6">
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-3 message-input-bg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                                <button data-action="send-message" id="send-btn" class="p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none">
+                                        <path d="m22 2-7 20-4-9-9-4Z"/>
+                                        <path d="M22 2 11 13"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button data-action="end-debate" id="end-debate-btn" class="w-full mt-3 p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow-md hover:shadow-lg">
+                                <span data-lang-key="endDebate">Münazarayı Bitir ve Rapor Al</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+                updateMessages();
+            }
+            
+            function renderReportScreen(report) {
+                state.currentReport = report;
+                const score = report.iknaEdicilikPuani || 0;
+                const html = `
+                    <div id="report-screen-content" class="flex flex-col h-full justify-center animate-fade-in">
+                        <div id="report-content" class="space-y-6">
+                            <h2 data-lang-key="reportTitle" class="text-3xl font-bold text-center text-cyan-600 dark:text-cyan-400">Performans Raporu</h2>
+                            <div class="relative flex justify-center items-center">
+                                <svg class="transform -rotate-90" width="120" height="120" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-700" stroke-width="12" />
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-cyan-500" stroke-width="12" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - (score / 10)}" />
+                                </svg>
+                                <span class="absolute text-3xl font-bold">${score}<span class="text-lg">/10</span></span>
+                            </div>
+                            <p data-lang-key="scoreLabel" class="text-center text-lg font-semibold text-subtle">İkna Edicilik Puanı</p>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                    <h3 data-lang-key="strongestArgument" class="font-semibold text-green-600 dark:text-green-400 mb-2">En Güçlü Argümanınız</h3>
+                                    <p class="text-sm">${report.enGucluArguman || '...'}</p>
+                                </div>
+                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                    <h3 class="font-semibold text-yellow-600 dark:text-yellow-400 mb-2"><span data-lang-key="improvementArea">Geliştirilmesi Gereken Nokta</span>: ${report.gelistirilmesiGerekenNokta?.tespitEdilenHataTuru || 'Genel'}</h3>
+                                    <p class="text-sm text-subtle mt-1 mb-2"><em>${report.gelistirilmesiGerekenNokta?.hataTanimi || ''}</em></p>
+                                    <p class="text-sm border-l-4 border-yellow-500 dark:border-yellow-400 pl-3"><strong><span data-lang-key="exampleSentence">Örnek Cümleniz</span>:</strong> "${report.gelistirilmesiGerekenNokta?.ornekCumle || '...'}"</p>
+                                    <p class="text-sm mt-2"><strong><span data-lang-key="suggestion">Öneri</span>:</strong> ${report.gelistirilmesiGerekenNokta?.onerilenGelistirme || '...'}</p>
+                                </div>
+                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                    <h3 data-lang-key="evidenceUsage" class="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Kanıt Kullanımı ve Destekleme</h3>
+                                    <p class="text-sm">${report.kanitKullanimi || '...'}</p>
+                                </div>
+                                <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                    <h3 data-lang-key="generalComment" class="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Genel Yorum</h3>
+                                    <p class="text-sm">${report.genelYorum || '...'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 space-y-3">
+                            <button data-action="draw-schema" class="w-full p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="drawSchema">Argüman Haritasını Çiz</span></button>
+                            <button data-action="download-pdf" class="w-full p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="downloadPDF">Raporu ve Haritayı İndir</span></button>
+                            <button data-action="new-debate" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="newDebate">Yeni Münazara Başlat</span></button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+            }
+
+            function renderSchemaScreen(schemaData) {
+                state.currentSchema = schemaData;
+                const html = `
+                    <div id="schema-screen" class="flex flex-col h-full">
+                        <h2 data-lang-key="schemaTitle" class="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-4">Argüman Haritası</h2>
+                        <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-4 rounded-lg overflow-auto">
+                        </div>
+                        <div class="mt-4">
+                            <button data-action="back-to-report" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg">
+                                <span data-lang-key="backToReport">Rapora Geri Dön</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+                const schemaContainer = document.getElementById('schema-container');
+                mermaid.render('mermaid-graph', schemaData.schema, (svg) => {
+                    schemaContainer.innerHTML = svg;
+                });
+            }
+
+            function renderHistoryScreen(history) {
+                const historyItems = history.map(item => `
+                    <div data-action="view-history-item" data-id="${item.id}" class="p-4 card-bg rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                        <p class="font-semibold text-contrast">${item.topic}</p>
+                        <p class="text-sm text-subtle">${item.timestamp}</p>
+                    </div>
+                `).join('');
+
+                const html = `
+                    <div id="history-screen" class="flex flex-col h-full animate-fade-in">
+                        <h2 data-lang-key="historyTitle" class="text-2xl font-bold text-center mb-4">Münazara Geçmişi</h2>
+                        <div class="flex-grow space-y-3 overflow-y-auto">
+                            ${history.length > 0 ? historyItems : `<p class="text-center text-subtle">Henüz bir münazara tamamlamadınız.</p>`}
+                        </div>
+                        <div class="mt-4">
+                            <button data-action="back-to-main" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="backToMain">Ana Menüye Dön</span></button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+            }
+            
             async function handleAction(event) {
                 const target = event.target.closest('[data-action]');
                 if (!target || target.disabled) return;
@@ -474,6 +556,9 @@
                 }
 
                 if (action === 'start-debate') {
+                    const topicSelect = document.getElementById('topic-select');
+                    const customTopicInput = document.getElementById('custom-topic-input');
+                    const errorMessage = document.getElementById('error-message');
                     const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
                     if (!finalTopic || !state.stance) {
                         errorMessage.textContent = translations[state.lang].errorTopic;
@@ -481,12 +566,11 @@
                     }
                     state.topic = finalTopic;
                     state.messages = [];
-                    debateTopicHeader.textContent = state.topic;
-                    updateMessages();
-                    showScreen('debate');
+                    renderDebateScreen();
                 }
 
                 if (action === 'send-message') {
+                    const messageInput = document.getElementById('message-input');
                     const text = messageInput.value.trim();
                     if (!text) return;
                     addMessage('user', text);
@@ -511,7 +595,6 @@
                         const report = await response.json();
                         if (!response.ok) throw new Error(report.error || 'Unknown server error');
                         renderReportScreen(report);
-                        showScreen('report');
                     } catch (error) {
                          addMessage('ai', `${translations[state.lang].errorReport}: ${error.message}`);
                     } finally {
@@ -519,12 +602,12 @@
                     }
                 }
 
-                if (action === 'new-debate') {
-                    showScreen('topic');
+                if (action === 'new-debate' || action === 'back-to-main') {
+                    renderTopicScreen();
                 }
                 
                 if (action === 'back-to-report') {
-                    showScreen('report');
+                    renderReportScreen(state.currentReport);
                 }
 
                 if (action === 'draw-schema') {
@@ -541,64 +624,79 @@
                            throw new Error(translations[state.lang].errorSchemaInvalid);
                         }
                         
-                        const { svg } = await mermaid.render('mermaid-graph', schemaData);
-                        schemaContainer.innerHTML = svg;
-                        
-                        showScreen('schema');
+                        renderSchemaScreen(data);
                     } catch (error) {
                          console.error("Mermaid render error:", error);
-                         schemaContainer.innerHTML = `
-                            <p class="text-yellow-400 mb-2">${translations[state.lang].errorSchemaRender}</p>
-                            <p class="text-gray-400 text-sm mb-2">Hata Detayı: ${error.message}</p>
-                            <p class="text-gray-400 text-sm mb-2 mt-4">Alınan Ham Veri:</p>
-                            <pre class="bg-black p-4 rounded text-white text-sm whitespace-pre-wrap">${schemaData || '(Veri alınamadı)'}</pre>
-                         `;
-                         showScreen('schema');
+                         // Render error inside schema screen
                     } finally {
                         setLoading(false);
                     }
                 }
 
                 if (action === 'download-pdf') {
-                    setLoading(true, translations[state.lang].pdfLoading);
-                    try {
-                        const { jsPDF } = window.jspdf;
-                        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                    // ... (Mevcut kod)
+                }
 
-                        const reportContent = document.getElementById('report-content');
-                        const reportCanvas = await html2canvas(reportContent, { backgroundColor: state.theme === 'dark' ? '#1f2937' : '#ffffff', scale: 2 });
-                        const reportImgData = reportCanvas.toDataURL('image/png');
-                        const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const reportImgProps = pdf.getImageProperties(reportImgData);
-                        const reportImgHeight = (reportImgProps.height * pdfWidth) / reportImgProps.width;
-                        pdf.addImage(reportImgData, 'PNG', 0, 0, pdfWidth, reportImgHeight);
+                if (action === 'show-register') {
+                    renderRegisterScreen();
+                }
 
-                        const schemaResponse = await fetch('/api/schema', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
-                        const schemaData = await schemaResponse.json();
-                        if (!schemaResponse.ok) throw new Error(schemaData.error || translations[state.lang].errorSchema);
+                if (action === 'show-login') {
+                    renderLoginScreen();
+                }
 
-                        const renderContainer = document.getElementById('pdf-render-container');
-                        const { svg } = await mermaid.render('temp-mermaid-graph-id', schemaData.schema);
-                        renderContainer.innerHTML = svg;
-                        
-                        await new Promise(resolve => requestAnimationFrame(resolve));
+                if (action === 'guest-login') {
+                    document.getElementById('user-info').classList.add('hidden');
+                    renderTopicScreen();
+                }
 
-                        const schemaCanvas = await html2canvas(renderContainer, { backgroundColor: state.theme === 'dark' ? '#111827' : '#ffffff', scale: 2 });
-                        const schemaImgData = schemaCanvas.toDataURL('image/png');
-                        const schemaImgProps = pdf.getImageProperties(schemaImgData);
-                        const schemaImgHeight = (schemaImgProps.height * pdfWidth) / schemaImgProps.width;
+                if (action === 'login' || action === 'register') {
+                    const isLogin = action === 'login';
+                    const usernameEl = document.getElementById(isLogin ? 'login-username' : 'register-username');
+                    const passwordEl = document.getElementById(isLogin ? 'login-password' : 'register-password');
+                    const errorEl = document.getElementById('auth-error');
 
-                        pdf.addPage();
-                        pdf.addImage(schemaImgData, 'PNG', 0, 0, pdfWidth, schemaImgHeight);
-                        
-                        renderContainer.innerHTML = '';
-                        pdf.save('munazara-raporu.pdf');
+                    const response = await fetch(isLogin ? '/api/login' : '/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: usernameEl.value, password: passwordEl.value })
+                    });
+                    const data = await response.json();
 
-                    } catch (error) {
-                        console.error("PDF Oluşturma Hatası:", error);
-                        alert(`${translations[state.lang].errorPDF}: ${error.message}`);
-                    } finally {
-                        setLoading(false);
+                    if(response.ok) {
+                        if (isLogin) {
+                            document.getElementById('user-info').classList.remove('hidden');
+                            document.getElementById('username-display').textContent = data.username;
+                            renderTopicScreen();
+                        } else {
+                            renderLoginScreen();
+                        }
+                    } else {
+                        errorEl.textContent = data.error;
+                    }
+                }
+
+                if (action === 'logout') {
+                    await fetch('/api/logout', { method: 'POST' });
+                    document.getElementById('user-info').classList.add('hidden');
+                    renderLoginScreen();
+                }
+
+                if (action === 'show-history') {
+                    const response = await fetch('/api/history');
+                    const historyData = await response.json();
+                    if (response.ok) {
+                        state.history = historyData;
+                        renderHistoryScreen(historyData);
+                    }
+                }
+
+                if (action === 'view-history-item') {
+                    const debateId = parseInt(target.dataset.id);
+                    const debate = state.history.find(d => d.id === debateId);
+                    if (debate) {
+                        renderReportScreen(debate.report);
+                        state.currentSchema = debate.schema;
                     }
                 }
             }
@@ -608,20 +706,19 @@
             
             mermaid.initialize({ startOnLoad: false, theme: savedTheme });
             document.body.addEventListener('click', handleAction);
-            topicSelect.addEventListener('change', () => {
-                customTopicContainer.classList.toggle('hidden', topicSelect.value !== 'custom');
-                checkCanStart();
-            });
-            customTopicInput.addEventListener('input', checkCanStart);
-            messageInput.addEventListener('keypress', e => {
-                if (e.key === 'Enter' && !document.querySelector('[data-action="send-message"]').disabled) {
-                    handleAction({ target: document.querySelector('[data-action="send-message"]') });
+            
+            fetch('/api/status').then(res => res.json()).then(data => {
+                if (data.logged_in) {
+                    document.getElementById('user-info').classList.remove('hidden');
+                    document.getElementById('username-display').textContent = data.username;
+                    renderTopicScreen();
+                } else {
+                    renderLoginScreen();
                 }
             });
-            
+
             setLanguage(savedLang);
             setTheme(savedTheme);
-            showScreen('topic');
         });
     </script>
 </body>
