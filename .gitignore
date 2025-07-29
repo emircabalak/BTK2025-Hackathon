@@ -1,0 +1,6 @@
+# Python'a özgü geçici dosyalar
+__pycache__/
+*.pyc
+
+# Hassas bilgileri içeren .env dosyasını yoksay
+.env

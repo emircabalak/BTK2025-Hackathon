@@ -13,7 +13,7 @@
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .animate-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
         .dark body { background-color: #111827; }
         
         /* Yazı renkleri ve kontrast düzenlemeleri */
@@ -33,7 +33,7 @@
             transform: translateX(0);
         }
         .theme-toggle-circle.dark {
-            transform: translateX(36px);
+            transform: translateX(30px);
         }
         
         /* Diğer stiller */
@@ -44,6 +44,42 @@
         .dark .bg-debate-light { background-color: #1f2937; }
         .card-bg { background-color: #f3f4f6; }
         .dark .card-bg { background-color: #374151; }
+        
+        /* Yeni eklenen stiller */
+        .message-input-bg { background-color: #f3f4f6; }
+        .dark .message-input-bg { background-color: #374151; }
+        .ai-message-bg { background-color: #f3f4f6; }
+        .dark .ai-message-bg { background-color: #374151; }
+        
+        /* Konu seçme ekranı için gri arka plan */
+        .topic-screen-bg {
+            background-color: #f3f4f6;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .dark .topic-screen-bg {
+            background-color: #1f2937;
+        }
+        
+        /* Seçim kutusu stilleri */
+        .select-bg {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+        }
+        .dark .select-bg {
+            background-color: #374151;
+            border-color: #4b5563;
+        }
+        
+        /* Özel konu girişi */
+        .custom-topic-bg {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+        }
+        .dark .custom-topic-bg {
+            background-color: #374151;
+            border-color: #4b5563;
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,10 +134,10 @@
             
             <main class="flex-grow p-6 overflow-y-auto">
                 <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
-                    <div class="space-y-6">
+                    <div class="topic-screen-bg space-y-6">
                         <div>
                             <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-sm font-medium text-subtle mb-2">1. Bir Münazara Konusu Seçin</label>
-                            <select id="topic-select" class="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
+                            <select id="topic-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
                                 <option value="" disabled selected data-lang-key="topicSelectPlaceholder">Konu seç...</option>
                                 <option value="Yapay zeka insanlık için bir tehdit mi?" data-lang-key="topic1">Yapay zeka insanlık için bir tehdit mi?</option>
                                 <option value="Üniversite eğitimi herkes için ücretsiz mi olmalı?" data-lang-key="topic2">Üniversite eğitimi herkes için ücretsiz mi olmalı?</option>
@@ -110,7 +146,7 @@
                             </select>
                         </div>
                         <div id="custom-topic-container" class="hidden">
-                            <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                            <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 custom-topic-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
                         </div>
                         <div>
                             <h3 data-lang-key="stanceSelectLabel" class="block text-sm font-medium text-subtle mb-2">2. Tarafınızı Belirleyin</h3>
@@ -138,7 +174,7 @@
                     </div>
                     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center space-x-2">
-                            <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                            <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-3 message-input-bg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
                             <button data-action="send-message" id="send-btn" class="p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none">
                                     <path d="m22 2-7 20-4-9-9-4Z"/>
@@ -329,7 +365,7 @@
                 messagesContainer.innerHTML = state.messages.map(msg => `
                     <div class="flex items-start gap-3 animate-fade-in ${msg.author === 'user' ? 'justify-end' : 'justify-start'}">
                         ${msg.author === 'ai' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>' : ''}
-                        <div class="max-w-md p-3 rounded-xl ${msg.author === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 text-contrast rounded-bl-none'}">
+                        <div class="max-w-md p-3 rounded-xl ${msg.author === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'ai-message-bg text-contrast rounded-bl-none'}">
                             <p class="text-sm" style="white-space: pre-wrap;">${msg.text}</p>
                         </div>
                         ${msg.author === 'user' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 dark:text-gray-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' : ''}
@@ -355,7 +391,7 @@
                         loadingEl.innerHTML = `
                             <div class="flex items-start gap-3 justify-start">
                                 <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>
-                                <div class="max-w-md p-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-contrast rounded-bl-none">
+                                <div class="max-w-md p-3 rounded-xl ai-message-bg text-contrast rounded-bl-none">
                                     <div class="flex items-center space-x-2"><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></div></div>
                                     ${message ? `<p class="text-sm ml-2">${message}</p>` : ''}
                                 </div>
