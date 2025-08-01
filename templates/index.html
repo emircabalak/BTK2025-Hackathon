@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
@@ -15,14 +16,11 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
         .dark body { background-color: #111827; }
-        
         .text-contrast { color: #1f2937; }
         .dark .text-contrast { color: #f9fafb; }
         .text-subtle { color: #4b5563; }
         .dark .text-subtle { color: #9ca3af; }
-        
         .moon-icon { transform: translate(-0.5px, 0); }
-        
         .theme-toggle-circle {
             transition: transform 0.3s ease-in-out;
         }
@@ -30,9 +28,8 @@
             transform: translateX(0);
         }
         .theme-toggle-circle.dark {
-            transform: translateX(26px);
+            transform: translateX(30px);
         }
-        
         #schema-container svg { width: 100%; height: auto; }
         .header-bg-light { background-color: rgba(255, 255, 255, 0.8); }
         .dark .header-bg-light { background-color: rgba(31, 41, 55, 0.8); }
@@ -40,12 +37,10 @@
         .dark .bg-debate-light { background-color: #1f2937; }
         .card-bg { background-color: #f3f4f6; }
         .dark .card-bg { background-color: #374151; }
-        
         .message-input-bg { background-color: #f3f4f6; }
         .dark .message-input-bg { background-color: #374151; }
         .ai-message-bg { background-color: #f3f4f6; }
         .dark .ai-message-bg { background-color: #374151; }
-        
         .topic-screen-bg {
             background-color: #f3f4f6;
             border-radius: 16px;
@@ -54,7 +49,6 @@
         .dark .topic-screen-bg {
             background-color: #1f2937;
         }
-        
         .select-bg {
             background-color: #ffffff;
             border: 1px solid #d1d5db;
@@ -63,7 +57,6 @@
             background-color: #374151;
             border-color: #4b5563;
         }
-        
         .custom-topic-bg {
             background-color: #ffffff;
             border: 1px solid #d1d5db;
@@ -127,7 +120,6 @@
             </header>
             
             <main class="flex-grow p-6 overflow-y-auto">
-                <!-- EKRANLAR BURAYA GELECEK -->
             </main>
         </div>
     </div>
@@ -196,7 +188,15 @@
                     showRegister: "Hesabın yok mu? Kayıt ol",
                     showLogin: "Zaten hesabın var mı? Giriş yap",
                     historyTitle: "Münazara Geçmişi",
-                    backToMain: "Ana Menüye Dön"
+                    backToMain: "Ana Menüye Dön",
+                    analyzeProfile: "Profilimi Analiz Et",
+                    profileTitle: "Münazır Profili",
+                    profileError: "Profil analizi için en az 3 münazara tamamlamanız gerekmektedir.",
+                    progressChart: "Gelişim Grafiği",
+                    commonFallacy: "En Sık Tekrarlanan Mantık Hatası",
+                    debateStyle: "Münazara Stiliniz",
+                    strength: "Güçlü Yönünüz",
+                    weakness: "Geliştirilecek Yönünüz"
                 },
                 en: {
                     appTitle: "Debate Arena",
@@ -246,12 +246,19 @@
                     showRegister: "Don't have an account? Register",
                     showLogin: "Already have an account? Login",
                     historyTitle: "Debate History",
-                    backToMain: "Back to Main Menu"
+                    backToMain: "Back to Main Menu",
+                    analyzeProfile: "Analyze My Profile",
+                    profileTitle: "Debater Profile",
+                    profileError: "You need to complete at least 3 debates for a profile analysis.",
+                    progressChart: "Progress Chart",
+                    commonFallacy: "Most Common Logical Fallacy",
+                    debateStyle: "Your Debate Style",
+                    strength: "Your Strength",
+                    weakness: "Area to Improve"
                 }
             };
             
             const mainContent = document.querySelector('main');
-            const toggleCircle = document.getElementById('toggle-circle');
             
             function setLanguage(lang) {
                 state.lang = lang;
@@ -275,21 +282,22 @@
             function setTheme(theme) {
                 state.theme = theme;
                 localStorage.setItem('theme', theme);
+                const toggleCircle = document.getElementById('toggle-circle');
                 const lightIcon = document.getElementById('theme-icon-light');
                 const darkIcon = document.getElementById('theme-icon-dark');
 
                 if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                    toggleCircle.classList.remove('light');
-                    toggleCircle.classList.add('dark');
-                    lightIcon.classList.add('hidden');
-                    darkIcon.classList.remove('hidden');
+                    if(toggleCircle) toggleCircle.classList.add('dark');
+                    if(toggleCircle) toggleCircle.classList.remove('light');
+                    if(lightIcon) lightIcon.classList.add('hidden');
+                    if(darkIcon) darkIcon.classList.remove('hidden');
                 } else {
                     document.documentElement.classList.remove('dark');
-                    toggleCircle.classList.remove('dark');
-                    toggleCircle.classList.add('light');
-                    lightIcon.classList.remove('hidden');
-                    darkIcon.classList.add('hidden');
+                    if(toggleCircle) toggleCircle.classList.add('light');
+                    if(toggleCircle) toggleCircle.classList.remove('dark');
+                    if(lightIcon) lightIcon.classList.remove('hidden');
+                    if(darkIcon) darkIcon.classList.add('hidden');
                 }
                 mermaid.initialize({ startOnLoad: false, theme: state.theme });
             }
@@ -379,6 +387,25 @@
                 showScreen(html);
             }
             
+            function checkCanStart() {
+                const topicSelect = document.getElementById('topic-select');
+                const customTopicInput = document.getElementById('custom-topic-input');
+                const startBtn = document.getElementById('start-debate-btn');
+                const errorMessage = document.getElementById('error-message');
+                
+                if (!topicSelect || !startBtn) return;
+
+                const isCustomTopic = topicSelect.value === 'custom';
+                const customTopicValid = !isCustomTopic || (customTopicInput && customTopicInput.value.trim().length > 0);
+                
+                const canStart = state.stance && state.topic && customTopicValid;
+                startBtn.disabled = !canStart;
+                
+                if (errorMessage) {
+                    errorMessage.textContent = canStart ? '' : translations[state.lang].errorTopic;
+                }
+            }
+            
             function renderTopicScreen() {
                 const html = `
                     <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
@@ -415,6 +442,30 @@
                     </div>
                 `;
                 showScreen(html);
+                const topicSelect = document.getElementById('topic-select');
+                const customTopicInput = document.getElementById('custom-topic-input');
+                
+                topicSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        document.getElementById('custom-topic-container').classList.remove('hidden');
+                        customTopicInput.focus();
+                        state.topic = customTopicInput.value.trim();
+                    } else {
+                        document.getElementById('custom-topic-container').classList.add('hidden');
+                        state.topic = this.value;
+                    }
+                    checkCanStart();
+                });
+                
+                if (customTopicInput) {
+                    customTopicInput.addEventListener('input', function() {
+                        state.topic = this.value;
+                        checkCanStart();
+                    });
+                }
+                
+                state.topic = topicSelect.value === 'custom' ? '' : topicSelect.value;
+                checkCanStart();
             }
 
             function renderDebateScreen() {
@@ -443,6 +494,15 @@
                 `;
                 showScreen(html);
                 updateMessages();
+                
+                const messageInput = document.getElementById('message-input');
+                if (messageInput) {
+                    messageInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            document.querySelector('[data-action="send-message"]').click();
+                        }
+                    });
+                }
             }
             
             function renderReportScreen(report) {
@@ -507,9 +567,18 @@
                 `;
                 showScreen(html);
                 const schemaContainer = document.getElementById('schema-container');
-                mermaid.render('mermaid-graph', schemaData.schema, (svg) => {
-                    schemaContainer.innerHTML = svg;
-                });
+                try {
+                    if (schemaData && schemaData.schema) {
+                        mermaid.render('mermaid-graph', schemaData.schema, (svg) => {
+                            schemaContainer.innerHTML = svg;
+                        });
+                    } else {
+                        throw new Error(translations[state.lang].errorSchemaInvalid);
+                    }
+                } catch (error) {
+                    console.error("Mermaid render error:", error);
+                    schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
+                }
             }
 
             function renderHistoryScreen(history) {
@@ -526,12 +595,65 @@
                         <div class="flex-grow space-y-3 overflow-y-auto">
                             ${history.length > 0 ? historyItems : `<p class="text-center text-subtle">Henüz bir münazara tamamlamadınız.</p>`}
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4 space-y-3">
+                            <button data-action="analyze-profile" class="w-full p-3 bg-teal-600 text-white font-bold rounded-lg disabled:bg-gray-500" ${history.length < 3 ? 'disabled' : ''}><span data-lang-key="analyzeProfile">Profilimi Analiz Et</span></button>
                             <button data-action="back-to-main" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="backToMain">Ana Menüye Dön</span></button>
                         </div>
                     </div>
                 `;
                 showScreen(html);
+            }
+
+            function renderProfileScreen(profile) {
+                const html = `
+                    <div id="profile-screen" class="flex flex-col h-full animate-fade-in">
+                        <h2 data-lang-key="profileTitle" class="text-2xl font-bold text-center mb-4">Münazır Profili</h2>
+                        <div class="flex-grow space-y-4 overflow-y-auto p-1">
+                            <div class="p-4 card-bg rounded-lg">
+                                <h3 data-lang-key="progressChart" class="font-semibold text-contrast mb-2">Gelişim Grafiği</h3>
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                            <div class="p-4 card-bg rounded-lg">
+                                <h3 data-lang-key="commonFallacy" class="font-semibold text-contrast mb-2">En Sık Tekrarlanan Mantık Hatası</h3>
+                                <p class="font-bold text-yellow-500">${profile.enSikHata?.hataTuru || 'Belirlenmedi'}</p>
+                                <p class="text-sm text-subtle mt-1">${profile.enSikHata?.tavsiye || 'Tavsiye bulunamadı.'}</p>
+                            </div>
+                            <div class="p-4 card-bg rounded-lg">
+                                <h3 data-lang-key="debateStyle" class="font-semibold text-contrast mb-2">Münazara Stiliniz</h3>
+                                <p class="text-sm">${profile.munazaraStili || 'Analiz ediliyor...'}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 card-bg rounded-lg">
+                                    <h3 data-lang-key="strength" class="font-semibold text-green-500 mb-2">Güçlü Yönünüz</h3>
+                                    <p class="text-sm">${profile.gucluYon || 'Analiz ediliyor...'}</p>
+                                </div>
+                                <div class="p-4 card-bg rounded-lg">
+                                    <h3 data-lang-key="weakness" class="font-semibold text-red-500 mb-2">Geliştirilecek Yönünüz</h3>
+                                    <p class="text-sm">${profile.gelistirilecekYon || 'Analiz ediliyor...'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button data-action="show-history" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg">Geri Dön</button>
+                        </div>
+                    </div>
+                `;
+                showScreen(html);
+                
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: state.history.map((_, i) => `Münazara ${i + 1}`),
+                        datasets: [{
+                            label: 'İkna Puanı',
+                            data: state.history.map(d => d.report.iknaEdicilikPuani),
+                            borderColor: '#06b6d4',
+                            tension: 0.1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true, max: 10 } } }
+                });
             }
             
             async function handleAction(event) {
@@ -550,18 +672,31 @@
 
                 if (action === 'set-stance') {
                     state.stance = target.dataset.stance;
-                    document.querySelectorAll('[data-action="set-stance"]').forEach(btn => btn.classList.remove('bg-green-500', 'dark:bg-green-600', 'ring-2', 'ring-green-400', 'bg-red-500', 'dark:bg-red-600', 'ring-red-400', 'text-white'));
-                    target.classList.add(state.stance === 'savunuyorum' ? 'bg-green-500' : 'bg-red-500', state.stance === 'savunuyorum' ? 'dark:bg-green-600' : 'dark:bg-red-600', 'ring-2', state.stance === 'savunuyorum' ? 'ring-green-400' : 'ring-red-400', 'text-white');
+                    
+                    document.querySelectorAll('[data-action="set-stance"]').forEach(btn => {
+                        btn.classList.remove('bg-green-500', 'dark:bg-green-600', 'ring-2', 'ring-green-400', 'text-white');
+                        btn.classList.remove('bg-red-500', 'dark:bg-red-600', 'ring-red-400');
+                        btn.classList.add('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
+                    });
+                    
+                    target.classList.remove('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
+                    target.classList.add(
+                        state.stance === 'savunuyorum' ? 'bg-green-500' : 'bg-red-500',
+                        state.stance === 'savunuyorum' ? 'dark:bg-green-600' : 'dark:bg-red-600',
+                        'ring-2',
+                        state.stance === 'savunuyorum' ? 'ring-green-400' : 'ring-red-400',
+                        'text-white'
+                    );
+                    
                     checkCanStart();
                 }
 
                 if (action === 'start-debate') {
                     const topicSelect = document.getElementById('topic-select');
                     const customTopicInput = document.getElementById('custom-topic-input');
-                    const errorMessage = document.getElementById('error-message');
                     const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
                     if (!finalTopic || !state.stance) {
-                        errorMessage.textContent = translations[state.lang].errorTopic;
+                        checkCanStart();
                         return;
                     }
                     state.topic = finalTopic;
@@ -573,14 +708,31 @@
                     const messageInput = document.getElementById('message-input');
                     const text = messageInput.value.trim();
                     if (!text) return;
+                    
                     addMessage('user', text);
                     messageInput.value = '';
                     setLoading(true);
+                    
                     try {
-                        const response = await fetch('/api/debate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const response = await fetch('/api/debate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                topic: state.topic,
+                                stance: state.stance,
+                                messages: state.messages,
+                                lang: state.lang
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({error: translations[state.lang].errorSendMessage}));
+                            throw new Error(errData.error || translations[state.lang].errorSendMessage);
+                        }
+                        
                         const data = await response.json();
-                        if (!response.ok) throw new Error(data.error || 'Unknown server error');
                         addMessage('ai', data.reply);
+                        
                     } catch (error) {
                         addMessage('ai', `${translations[state.lang].errorSendMessage}: ${error.message}`);
                     } finally {
@@ -591,12 +743,23 @@
                 if (action === 'end-debate') {
                     setLoading(true);
                     try {
-                        const response = await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
+                        const response = await fetch('/api/report', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                messages: state.messages,
+                                topic: state.topic,
+                                lang: state.lang
+                            })
+                        });
+                        if (!response.ok) {
+                             const errData = await response.json().catch(() => ({error: translations[state.lang].errorReport}));
+                             throw new Error(errData.error || translations[state.lang].errorReport);
+                        }
                         const report = await response.json();
-                        if (!response.ok) throw new Error(report.error || 'Unknown server error');
                         renderReportScreen(report);
                     } catch (error) {
-                         addMessage('ai', `${translations[state.lang].errorReport}: ${error.message}`);
+                        alert(error.message);
                     } finally {
                         setLoading(false);
                     }
@@ -612,31 +775,73 @@
 
                 if (action === 'draw-schema') {
                     setLoading(true);
-                    const schemaContainer = document.getElementById('schema-container');
-                    let schemaData = '';
-                    try {
-                        const response = await fetch('/api/schema', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state) });
-                        const data = await response.json();
-                        if (!response.ok) throw new Error(data.error || translations[state.lang].errorSchema);
-                        
-                        schemaData = data.schema;
-                        if (!schemaData || !schemaData.trim().startsWith('graph')) {
-                           throw new Error(translations[state.lang].errorSchemaInvalid);
+                     try {
+                        const response = await fetch('/api/schema', {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({
+                               messages: state.messages,
+                               lang: state.lang
+                           })
+                        });
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({error: translations[state.lang].errorSchema}));
+                            throw new Error(errData.error || translations[state.lang].errorSchema);
                         }
-                        
-                        renderSchemaScreen(data);
+                        const schemaData = await response.json();
+                        renderSchemaScreen(schemaData);
                     } catch (error) {
-                         console.error("Mermaid render error:", error);
-                         // Render error inside schema screen
+                        console.error("Schema error:", error);
+                        alert(error.message);
                     } finally {
                         setLoading(false);
                     }
                 }
 
                 if (action === 'download-pdf') {
-                    // ... (Mevcut kod)
-                }
+                    setLoading(true, translations[state.lang].pdfLoading);
+                    try {
+                        if (!state.currentReport) {
+                             alert("PDF oluşturmak için önce bir rapor oluşturulmalıdır.");
+                             setLoading(false);
+                             return;
+                        }
 
+                        const { jsPDF } = window.jspdf;
+                        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                        const reportElement = document.getElementById('report-content');
+                        
+                        const reportCanvas = await html2canvas(reportElement, { scale: 2, useCORS: true, backgroundColor: state.theme === 'dark' ? '#1f2937' : '#ffffff' });
+                        const reportImgData = reportCanvas.toDataURL('image/png');
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
+                        pdf.addImage(reportImgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                        
+                        if (state.currentSchema && state.currentSchema.schema) {
+                            pdf.addPage();
+                            const schemaContainer = document.createElement('div');
+                            schemaContainer.style.width = '800px'; 
+                            document.body.appendChild(schemaContainer);
+                            
+                            const svgText = await mermaid.render('pdf-mermaid', state.currentSchema.schema);
+                            schemaContainer.innerHTML = svgText.svg;
+                            const schemaCanvas = await html2canvas(schemaContainer, { scale: 2, useCORS: true });
+                            const schemaImgData = schemaCanvas.toDataURL('image/png');
+                            const schemaPdfHeight = (schemaCanvas.height * pdfWidth) / schemaCanvas.width;
+                            pdf.addImage(schemaImgData, 'PNG', 0, 0, pdfWidth, schemaPdfHeight);
+                            document.body.removeChild(schemaContainer);
+                        }
+                        
+                        pdf.save('munazara-raporu.pdf');
+
+                    } catch (error) {
+                        console.error("PDF Oluşturma Hatası:", error);
+                        alert(`${translations[state.lang].errorPDF}: ${error.message}`);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+                
                 if (action === 'show-register') {
                     renderRegisterScreen();
                 }
@@ -644,7 +849,7 @@
                 if (action === 'show-login') {
                     renderLoginScreen();
                 }
-
+                
                 if (action === 'guest-login') {
                     document.getElementById('user-info').classList.add('hidden');
                     renderTopicScreen();
@@ -652,27 +857,41 @@
 
                 if (action === 'login' || action === 'register') {
                     const isLogin = action === 'login';
+                    const endpoint = isLogin ? '/api/login' : '/api/register';
                     const usernameEl = document.getElementById(isLogin ? 'login-username' : 'register-username');
                     const passwordEl = document.getElementById(isLogin ? 'login-password' : 'register-password');
                     const errorEl = document.getElementById('auth-error');
+                    
+                    const username = usernameEl.value;
+                    const password = passwordEl.value;
 
-                    const response = await fetch(isLogin ? '/api/login' : '/api/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: usernameEl.value, password: passwordEl.value })
-                    });
-                    const data = await response.json();
+                    if (!username || !password) {
+                        errorEl.textContent = "Kullanıcı adı ve şifre gereklidir.";
+                        return;
+                    }
 
-                    if(response.ok) {
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password })
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Bir hata oluştu.');
+                        }
+                        
                         if (isLogin) {
                             document.getElementById('user-info').classList.remove('hidden');
                             document.getElementById('username-display').textContent = data.username;
                             renderTopicScreen();
                         } else {
+                            alert('Kayıt başarılı! Lütfen giriş yapın.');
                             renderLoginScreen();
                         }
-                    } else {
-                        errorEl.textContent = data.error;
+
+                    } catch (error) {
+                        errorEl.textContent = error.message;
                     }
                 }
 
@@ -683,11 +902,21 @@
                 }
 
                 if (action === 'show-history') {
-                    const response = await fetch('/api/history');
-                    const historyData = await response.json();
-                    if (response.ok) {
+                    try {
+                        const response = await fetch('/api/history');
+                        if (!response.ok) {
+                            const data = await response.json().catch(() => null);
+                            alert(data?.error || 'Geçmiş verileri alınamadı.');
+                            if (response.status === 401) {
+                                renderLoginScreen();
+                            }
+                            return;
+                        }
+                        const historyData = await response.json();
                         state.history = historyData;
                         renderHistoryScreen(historyData);
+                    } catch (error) {
+                        console.error('History fetch error:', error);
                     }
                 }
 
@@ -699,26 +928,50 @@
                         state.currentSchema = debate.schema;
                     }
                 }
-            }
 
-            const savedLang = localStorage.getItem('lang') || 'tr';
-            const savedTheme = localStorage.getItem('theme') || 'light';
+                if(action === 'analyze-profile') {
+                    setLoading(true);
+                    try {
+                        const response = await fetch(`/api/profile?lang=${state.lang}`);
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.error || "Profil analizi yapılamadı.");
+                        }
+                        renderProfileScreen(data);
+                    } catch (error) {
+                        alert(error.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            }
             
-            mermaid.initialize({ startOnLoad: false, theme: savedTheme });
-            document.body.addEventListener('click', handleAction);
-            
-            fetch('/api/status').then(res => res.json()).then(data => {
-                if (data.logged_in) {
-                    document.getElementById('user-info').classList.remove('hidden');
-                    document.getElementById('username-display').textContent = data.username;
-                    renderTopicScreen();
-                } else {
+            async function initApp() {
+                const savedLang = localStorage.getItem('lang') || 'tr';
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                
+                setLanguage(savedLang);
+                setTheme(savedTheme);
+                mermaid.initialize({ startOnLoad: false, theme: savedTheme });
+                document.body.addEventListener('click', handleAction);
+
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    if (data.logged_in) {
+                        document.getElementById('user-info').classList.remove('hidden');
+                        document.getElementById('username-display').textContent = data.username;
+                        renderTopicScreen();
+                    } else {
+                        renderLoginScreen();
+                    }
+                } catch (error) {
+                    console.error("Could not check status:", error);
                     renderLoginScreen();
                 }
-            });
+            }
 
-            setLanguage(savedLang);
-            setTheme(savedTheme);
+            initApp();
         });
     </script>
 </body>
