@@ -48,6 +48,8 @@ class Debate(db.Model):
 
 API_KEY = os.getenv("GOOGLE_API_KEY", "YOUR_API_KEY_HERE")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
+TTS_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={API_KEY}"
+
 
 @app.route('/')
 def index():
@@ -112,16 +114,36 @@ def handle_debate():
         system_prompt = prompts[lang]["debate_system"].format(topic=topic, stance=stance)
         full_prompt = f"{system_prompt}\n\n---SOHBET GEÇMİŞİ---\n{conversation_history}\n\nYapay Zeka Münazırının sıradaki yanıtı:"
         
-        payload = {"contents": [{"role": "user", "parts": [{"text": full_prompt}]}]}
-        response = requests.post(GEMINI_API_URL, json=payload)
-        response.raise_for_status()
-        result = response.json()
+        text_payload = {"contents": [{"role": "user", "parts": [{"text": full_prompt}]}]}
+        text_response = requests.post(GEMINI_API_URL, json=text_payload)
+        text_response.raise_for_status()
+        result = text_response.json()
         
         if 'candidates' not in result or not result['candidates']:
             return jsonify({"reply": "Yanıt alınamadı. Güvenlik ayarları nedeniyle engellenmiş olabilir."}), 200
 
-        reply = result['candidates'][0]['content']['parts'][0]['text']
-        return jsonify({"reply": reply})
+        reply_text = result['candidates'][0]['content']['parts'][0]['text']
+
+        tts_payload = {
+            "contents": [{"parts": [{"text": reply_text}]}],
+            "generationConfig": {"responseModalities": ["AUDIO"]},
+            "model": "gemini-2.5-flash-preview-tts"
+        }
+        
+        tts_response = requests.post(TTS_API_URL, json=tts_payload)
+        tts_response.raise_for_status()
+        tts_result = tts_response.json()
+
+        audio_part = tts_result['candidates'][0]['content']['parts'][0]
+        audio_data = audio_part['inlineData']['data']
+        mime_type = audio_part['inlineData']['mimeType']
+
+        return jsonify({
+            "reply": reply_text,
+            "audioData": audio_data,
+            "mimeType": mime_type
+        })
+
     except requests.exceptions.HTTPError as e:
         error_details = e.response.json()
         print(f"API Hatası: {error_details}")
