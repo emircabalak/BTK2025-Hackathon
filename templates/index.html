@@ -23,7 +23,7 @@
         .moon-icon { transform: translate(-0.5px, 0); }
         .theme-toggle-circle { transition: transform 0.3s ease-in-out; }
         .theme-toggle-circle.light { transform: translateX(0); }
-        .theme-toggle-circle.dark { transform: translateX(26px); }
+        .theme-toggle-circle.dark { transform: translateX(30px); }
         #schema-container svg { width: 100%; height: auto; }
         .header-bg-light { background-color: rgba(255, 255, 255, 0.8); }
         .dark .header-bg-light { background-color: rgba(31, 41, 55, 0.8); }
@@ -48,6 +48,18 @@
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,10 +86,6 @@
                         <button data-action="show-history" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m3.9 16.2 5.1-5.1 4 4L18.3 9.8"/></svg></button>
                         <button data-action="logout" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
                     </div>
-                    <button data-action="toggle-last-audio" id="audio-control-btn" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600 hidden">
-                        <svg id="speaker-on-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                        <svg id="speaker-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></svg>
-                    </button>
                     <button data-action="toggle-theme" id="theme-toggle" type="button" class="relative p-1.5 w-[64px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center transition-colors duration-300 ease-in-out">
                         <span id="toggle-circle" class="theme-toggle-circle w-7 h-7 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
                             <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/></svg>
@@ -100,6 +108,7 @@
             const state = {
                 topic: '',
                 stance: '',
+                personality: 'standard',
                 messages: [],
                 lang: 'tr',
                 theme: 'light',
@@ -108,7 +117,6 @@
                 currentSchema: null,
                 isRecording: false,
                 currentAudio: null,
-                lastAudioPayload: null,
             };
 
             const translations = {
@@ -125,6 +133,11 @@
                     stanceSelectLabel: "2. Tarafınızı Belirleyin",
                     stanceFor: "Savunuyorum",
                     stanceAgainst: "Karşı Çıkıyorum",
+                    personalitySelectLabel: "3. Yapay Zeka Kişiliğini Seçin",
+                    personalityStandard: "Standart",
+                    personalityAcademic: "Akademik",
+                    personalityAggressive: "Agresif",
+                    personalityCalm: "Sakin",
                     startDebate: "Münazarayı Başlat",
                     topicLabel: "Konu",
                     messagePlaceholder: "Argümanınızı yazın veya mikrofona basın...",
@@ -183,6 +196,11 @@
                     stanceSelectLabel: "2. Choose Your Stance",
                     stanceFor: "I'm For",
                     stanceAgainst: "I'm Against",
+                    personalitySelectLabel: "3. Select AI Personality",
+                    personalityStandard: "Standard",
+                    personalityAcademic: "Academic",
+                    personalityAggressive: "Aggressive",
+                    personalityCalm: "Calm",
                     startDebate: "Start Debate",
                     topicLabel: "Topic",
                     messagePlaceholder: "Write your argument or press the mic...",
@@ -282,12 +300,21 @@
             function updateMessages() {
                 const messagesContainer = document.getElementById('messages-container');
                 if (!messagesContainer) return;
-                messagesContainer.innerHTML = state.messages.map(msg => `
+                messagesContainer.innerHTML = state.messages.map((msg, index) => `
                     <div class="flex items-start gap-3 animate-fade-in ${msg.author === 'user' ? 'justify-end' : 'justify-start'}">
-                        ${msg.author === 'ai' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>' : ''}
+                        ${msg.author === 'ai' ? `
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                            </div>` : ''}
                         <div class="max-w-md p-3 rounded-xl ${msg.author === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'ai-message-bg text-contrast rounded-bl-none'}">
                             <p class="text-sm" style="white-space: pre-wrap;">${msg.text}</p>
                         </div>
+                        ${msg.author === 'ai' ? `
+                            <button data-action="generate-and-play-audio" data-message-index="${index}" class="p-2 rounded-full text-subtle self-center hover:bg-gray-200 dark:hover:bg-gray-600">
+                                <svg class="speaker-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                                <div class="spinner hidden"></div>
+                            </button>
+                        ` : ''}
                         ${msg.author === 'user' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 dark:text-gray-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' : ''}
                     </div>
                 `).join('');
@@ -295,7 +322,7 @@
             }
 
             function addMessage(author, text) {
-                state.messages.push({ author, text });
+                state.messages.push({ author, text, audio: null });
                 updateMessages();
             }
 
@@ -406,6 +433,15 @@
                                     </button>
                                 </div>
                             </div>
+                            <div>
+                                <label for="personality-select" data-lang-key="personalitySelectLabel" class="block text-sm font-medium text-subtle mb-2">3. Yapay Zeka Kişiliğini Seçin</label>
+                                <select id="personality-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
+                                    <option value="standard" selected data-lang-key="personalityStandard">Standart</option>
+                                    <option value="academic" data-lang-key="personalityAcademic">Akademik</option>
+                                    <option value="aggressive" data-lang-key="personalityAggressive">Agresif</option>
+                                    <option value="calm" data-lang-key="personalityCalm">Sakin</option>
+                                </select>
+                            </div>
                             <p id="error-message" class="text-red-500 dark:text-red-400 text-sm text-center h-4"></p>
                             <button data-action="start-debate" id="start-debate-btn" class="w-full p-4 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-bold text-white text-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg" disabled>
                                 <span data-lang-key="startDebate">Münazarayı Başlat</span>
@@ -416,6 +452,7 @@
                 showScreen(html);
                 const topicSelect = document.getElementById('topic-select');
                 const customTopicInput = document.getElementById('custom-topic-input');
+                const personalitySelect = document.getElementById('personality-select');
                 
                 topicSelect.addEventListener('change', function() {
                     if (this.value === 'custom') {
@@ -435,6 +472,10 @@
                         checkCanStart();
                     });
                 }
+                
+                personalitySelect.addEventListener('change', function() {
+                    state.personality = this.value;
+                });
                 
                 state.topic = topicSelect.value === 'custom' ? '' : topicSelect.value;
                 checkCanStart();
@@ -481,8 +522,8 @@
                 state.currentReport = report;
                 const score = report.iknaEdicilikPuani || 0;
                 const html = `
-                    <div id="report-screen-content" class="flex flex-col h-full justify-center animate-fade-in">
-                        <div id="report-content" class="space-y-6">
+                    <div id="report-screen-content" class="flex flex-col h-full animate-fade-in">
+                        <div id="report-content" class="space-y-6 pt-4">
                             <h2 data-lang-key="reportTitle" class="text-3xl font-bold text-center text-cyan-600 dark:text-cyan-400">Performans Raporu</h2>
                             <div class="relative flex justify-center items-center">
                                 <svg class="transform -rotate-90" width="120" height="120" viewBox="0 0 120 120">
@@ -646,16 +687,44 @@
                     toggleRecording();
                 }
                 
-                if (action === 'toggle-last-audio') {
-                    const audioBtn = document.getElementById('audio-control-btn');
-                    if (!audioBtn) return;
+                if (action === 'generate-and-play-audio') {
+                    const messageIndex = parseInt(target.dataset.messageIndex);
+                    const message = state.messages[messageIndex];
+                    const speakerIcon = target.querySelector('.speaker-icon');
+                    const spinner = target.querySelector('.spinner');
 
-                    if (state.currentAudio && !state.currentAudio.paused) {
+                    if (state.currentAudio) {
                         state.currentAudio.pause();
-                        state.currentAudio.currentTime = 0;
-                    } 
-                    else if (state.lastAudioPayload) {
-                        playPcmAudio(state.lastAudioPayload.audioData, state.lastAudioPayload.mimeType);
+                        if (state.currentAudio.messageIndex === messageIndex) {
+                            state.currentAudio = null;
+                            return;
+                        }
+                    }
+
+                    if (message.audio) {
+                        playPcmAudio(message.audio.audioData, message.audio.mimeType, messageIndex);
+                    } else {
+                        speakerIcon.classList.add('hidden');
+                        spinner.classList.remove('hidden');
+                        target.disabled = true;
+
+                        try {
+                            const response = await fetch('/api/tts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ text: message.text })
+                            });
+                            if (!response.ok) throw new Error('TTS request failed');
+                            const data = await response.json();
+                            message.audio = data;
+                            playPcmAudio(data.audioData, data.mimeType, messageIndex);
+                        } catch (error) {
+                            console.error("Error fetching TTS data:", error);
+                        } finally {
+                            speakerIcon.classList.remove('hidden');
+                            spinner.classList.add('hidden');
+                            target.disabled = false;
+                        }
                     }
                 }
 
@@ -709,6 +778,7 @@
                             body: JSON.stringify({
                                 topic: state.topic,
                                 stance: state.stance,
+                                personality: state.personality,
                                 messages: state.messages,
                                 lang: state.lang
                             })
@@ -721,9 +791,6 @@
                         
                         const data = await response.json();
                         addMessage('ai', data.reply);
-                        if(data.audioData) {
-                            playPcmAudio(data.audioData, data.mimeType);
-                        }
                         
                     } catch (error) {
                         addMessage('ai', `${translations[state.lang].errorSendMessage}: ${error.message}`);
@@ -1018,13 +1085,11 @@
                 return wavBlob;
             }
 
-            function playPcmAudio(audioData, mimeType) {
+            function playPcmAudio(audioData, mimeType, messageIndex) {
                 try {
                     if (state.currentAudio) {
                         state.currentAudio.pause();
-                        state.currentAudio = null;
                     }
-                    state.lastAudioPayload = { audioData, mimeType };
                     
                     const sampleRateMatch = mimeType.match(/rate=(\d+)/);
                     if (!sampleRateMatch) {
@@ -1038,23 +1103,8 @@
                     const audioUrl = URL.createObjectURL(wavBlob);
                     
                     state.currentAudio = new Audio(audioUrl);
-                    
-                    const audioBtn = document.getElementById('audio-control-btn');
-                    const speakerOnIcon = audioBtn.querySelector('#speaker-on-icon');
-                    const speakerOffIcon = audioBtn.querySelector('#speaker-off-icon');
-
-                    state.currentAudio.onplay = () => {
-                        speakerOnIcon.classList.remove('hidden');
-                        speakerOffIcon.classList.add('hidden');
-                    };
-
-                    state.currentAudio.onpause = () => {
-                        speakerOnIcon.classList.add('hidden');
-                        speakerOffIcon.classList.remove('hidden');
-                    };
-                    
+                    state.currentAudio.messageIndex = messageIndex;
                     state.currentAudio.play();
-                    audioBtn.classList.remove('hidden');
 
                 } catch (error) {
                     console.error("Error playing PCM audio:", error);

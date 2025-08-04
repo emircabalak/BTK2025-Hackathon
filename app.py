@@ -9,16 +9,31 @@ from datetime import datetime
 
 prompts = {
     'tr': {
-        'debate_system': "Sen bir münazara yapay zekasısın. Konu: '{topic}'. Senin görevin bu konuyu '{stance}' pozisyonundan savunmak. Kullanıcının argümanlarına mantıklı ve ikna edici karşı argümanlar sun.",
+        'debate_system': "Sen bir münazara yapay zekasısın. {personality_description} Konu: '{topic}'. Senin görevin bu konuyu '{stance}' pozisyonundan savunmak. Kullanıcının argümanlarına mantıklı ve ikna edici karşı argümanlar sun.",
         'report_system': "Aşağıdaki münazara geçmişini analiz et ve JSON formatında bir performans raporu oluştur: {conversation_history}",
         'schema_system': "Aşağıdaki münazara geçmişine dayanarak mermaid.js formatında bir argüman haritası oluştur: {conversation_history}",
         'profile_system': "Aşağıdaki münazara özet verilerine dayanarak bir münazır profili analizi yap. Analizin şu alanları içermeli: en sık yapılan mantık hatası ve bu hatadan kaçınmak için bir tavsiye, genel münazara stili, en güçlü yönü ve geliştirilmesi gereken yönü. Yanıtını, sağlanan JSON şemasına tam olarak uyacak şekilde formatla: {summary_data}"
     },
     'en': {
-        'debate_system': "You are a debate AI. The topic is: '{topic}'. Your role is to argue from the '{stance}' stance. Provide logical and persuasive counter-arguments to the user's points.",
+        'debate_system': "You are a debate AI. {personality_description} The topic is: '{topic}'. Your role is to argue from the '{stance}' stance. Provide logical and persuasive counter-arguments to the user's points.",
         'report_system': "Analyze the following debate history and create a performance report in JSON format: {conversation_history}",
         'schema_system': "Create an argument map in mermaid.js format based on the following debate history: {conversation_history}",
         'profile_system': "Based on the following summary data, perform a debater profile analysis. The analysis must include: the most common logical fallacy with advice to avoid it, the overall debate style, the main strength, and the area for improvement. Format your response to exactly match the provided JSON schema: {summary_data}"
+    }
+}
+
+personalities = {
+    'tr': {
+        'standard': "Standart bir münazır gibi davran.",
+        'academic': "Akademik bir dil kullan, argümanlarını bilimsel kanıtlara ve verilere dayandır.",
+        'aggressive': "Agresif ve iddialı bir üslup benimse, karşı tarafın argümanlarındaki zayıf noktalara sert bir şekilde saldır.",
+        'calm': "Sakin ve mantıklı bir şekilde konuş, duygusal tepkilerden kaçın ve soğukkanlılığını koru."
+    },
+    'en': {
+        'standard': "Act like a standard debater.",
+        'academic': "Use an academic tone, base your arguments on scientific evidence and data.",
+        'aggressive': "Adopt an aggressive and assertive style, harshly attacking the weak points in the opponent's arguments.",
+        'calm': "Speak in a calm and logical manner, avoid emotional reactions, and maintain your composure."
     }
 }
 
@@ -49,7 +64,6 @@ class Debate(db.Model):
 API_KEY = os.getenv("GOOGLE_API_KEY", "YOUR_API_KEY_HERE")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
 TTS_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={API_KEY}"
-
 
 @app.route('/')
 def index():
@@ -109,9 +123,16 @@ def handle_debate():
         stance_key = data.get('stance')
         stance = "savunuyorum" if stance_key == "savunuyorum" else "karşı çıkıyorum"
         messages = data.get('messages', [])
+        personality_key = data.get('personality', 'standard')
+        
+        personality_description = personalities[lang].get(personality_key, personalities[lang]['standard'])
         
         conversation_history = "\n".join([f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
-        system_prompt = prompts[lang]["debate_system"].format(topic=topic, stance=stance)
+        system_prompt = prompts[lang]["debate_system"].format(
+            topic=topic, 
+            stance=stance, 
+            personality_description=personality_description
+        )
         full_prompt = f"{system_prompt}\n\n---SOHBET GEÇMİŞİ---\n{conversation_history}\n\nYapay Zeka Münazırının sıradaki yanıtı:"
         
         text_payload = {"contents": [{"role": "user", "parts": [{"text": full_prompt}]}]}
@@ -124,8 +145,26 @@ def handle_debate():
 
         reply_text = result['candidates'][0]['content']['parts'][0]['text']
 
+        return jsonify({"reply": reply_text})
+
+    except requests.exceptions.HTTPError as e:
+        error_details = e.response.json()
+        print(f"API Hatası: {error_details}")
+        return jsonify({"error": f"API Hatası: {error_details.get('error', {}).get('message', str(e))}"}), 500
+    except Exception as e:
+        print(f"Sunucu Hatası: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/tts', methods=['POST'])
+def handle_tts():
+    try:
+        data = request.json
+        text_to_speak = data.get('text')
+        if not text_to_speak:
+            return jsonify({"error": "Metin gerekli."}), 400
+            
         tts_payload = {
-            "contents": [{"parts": [{"text": reply_text}]}],
+            "contents": [{"parts": [{"text": text_to_speak}]}],
             "generationConfig": {"responseModalities": ["AUDIO"]},
             "model": "gemini-2.5-flash-preview-tts"
         }
@@ -139,17 +178,11 @@ def handle_debate():
         mime_type = audio_part['inlineData']['mimeType']
 
         return jsonify({
-            "reply": reply_text,
             "audioData": audio_data,
             "mimeType": mime_type
         })
-
-    except requests.exceptions.HTTPError as e:
-        error_details = e.response.json()
-        print(f"API Hatası: {error_details}")
-        return jsonify({"error": f"API Hatası: {error_details.get('error', {}).get('message', str(e))}"}), 500
     except Exception as e:
-        print(f"Sunucu Hatası: {e}")
+        print(f"TTS Hatası: {e}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/report', methods=['POST'])
@@ -162,12 +195,35 @@ def handle_report():
         conversation_history = "\n".join([f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
         report_prompt = prompts[lang]["report_system"].format(conversation_history=conversation_history)
         
-        payload = { "contents": [{"role": "user", "parts": [{"text": report_prompt}]}] }
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": report_prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "responseSchema": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "iknaEdicilikPuani": {"type": "NUMBER"},
+                        "enGucluArguman": {"type": "STRING"},
+                        "gelistirilmesiGerekenNokta": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "tespitEdilenHataTuru": {"type": "STRING"},
+                                "hataTanimi": {"type": "STRING"},
+                                "ornekCumle": {"type": "STRING"},
+                                "onerilenGelistirme": {"type": "STRING"}
+                            }
+                        },
+                        "kanitKullanimi": {"type": "STRING"},
+                        "genelYorum": {"type": "STRING"}
+                    }
+                }
+            }
+        }
+        
         response = requests.post(GEMINI_API_URL, json=payload)
         response.raise_for_status()
         response_text = response.json()['candidates'][0]['content']['parts'][0]['text']
-        cleaned_json_string = response_text.strip().replace("```json", "").replace("```", "").strip()
-        report_json = json.loads(cleaned_json_string)
+        report_json = json.loads(response_text)
 
         if 'user_id' in session:
             schema_prompt = prompts[lang]["schema_system"].format(conversation_history=conversation_history)
