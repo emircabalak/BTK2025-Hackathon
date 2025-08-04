@@ -1,23 +1,25 @@
 import os
 import json
 import requests
+import time  # Hız limitini aşmamak için time modülünü ekliyoruz
 from flask import Flask, request, jsonify, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
+# Prompts remain the same, focusing on specific output from the AI.
 prompts = {
     'tr': {
         'debate_system': "Sen bir münazara yapay zekasısın. {personality_description} Konu: '{topic}'. Senin görevin bu konuyu '{stance}' pozisyonundan savunmak. Kullanıcının argümanlarına mantıklı ve ikna edici karşı argümanlar sun.",
         'report_system': "Aşağıdaki münazara geçmişini analiz et ve JSON formatında bir performans raporu oluştur: {conversation_history}",
-        'schema_system': "Aşağıdaki münazara geçmişine dayanarak mermaid.js formatında bir argüman haritası oluştur: {conversation_history}",
+        'schema_system': "Aşağıdaki münazara geçmişini analiz et ve SADECE mermaid.js formatında bir argüman haritası kodu çıktısı ver. Başka hiçbir açıklama veya metin ekleme. Çıktın doğrudan 'graph TD;' veya benzeri bir mermaid koduyla başlamalıdır. İşte geçmiş: {conversation_history}",
         'profile_system': "Aşağıdaki münazara özet verilerine dayanarak bir münazır profili analizi yap. Analizin şu alanları içermeli: en sık yapılan mantık hatası ve bu hatadan kaçınmak için bir tavsiye, genel münazara stili, en güçlü yönü ve geliştirilmesi gereken yönü. Yanıtını, sağlanan JSON şemasına tam olarak uyacak şekilde formatla: {summary_data}"
     },
     'en': {
         'debate_system': "You are a debate AI. {personality_description} The topic is: '{topic}'. Your role is to argue from the '{stance}' stance. Provide logical and persuasive counter-arguments to the user's points.",
         'report_system': "Analyze the following debate history and create a performance report in JSON format: {conversation_history}",
-        'schema_system': "Create an argument map in mermaid.js format based on the following debate history: {conversation_history}",
+        'schema_system': "Analyze the following debate history and provide ONLY the argument map code in mermaid.js format. Do not add any other explanations or text. Your output should start directly with 'graph TD;' or similar mermaid code. Here is the history: {conversation_history}",
         'profile_system': "Based on the following summary data, perform a debater profile analysis. The analysis must include: the most common logical fallacy with advice to avoid it, the overall debate style, the main strength, and the area for improvement. Format your response to exactly match the provided JSON schema: {summary_data}"
     }
 }
@@ -47,11 +49,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
     debates = db.relationship('Debate', backref='user', lazy=True)
+
 
 class Debate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,13 +65,16 @@ class Debate(db.Model):
     schema_data = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+
 API_KEY = os.getenv("GOOGLE_API_KEY", "YOUR_API_KEY_HERE")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
 TTS_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={API_KEY}"
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -88,6 +95,7 @@ def register():
 
     return jsonify({"message": "Kullanıcı başarıyla oluşturuldu."}), 201
 
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
@@ -102,17 +110,20 @@ def login():
 
     return jsonify({"error": "Geçersiz kullanıcı adı veya şifre."}), 401
 
+
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     return jsonify({"message": "Çıkış başarılı."}), 200
 
+
 @app.route('/api/status', methods=['GET'])
 def status():
     if 'user_id' in session:
         return jsonify({"logged_in": True, "username": session.get('username')})
     return jsonify({"logged_in": False})
+
 
 @app.route('/api/debate', methods=['POST'])
 def handle_debate():
@@ -124,22 +135,23 @@ def handle_debate():
         stance = "savunuyorum" if stance_key == "savunuyorum" else "karşı çıkıyorum"
         messages = data.get('messages', [])
         personality_key = data.get('personality', 'standard')
-        
+
         personality_description = personalities[lang].get(personality_key, personalities[lang]['standard'])
-        
-        conversation_history = "\n".join([f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
+
+        conversation_history = "\n".join(
+            [f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
         system_prompt = prompts[lang]["debate_system"].format(
-            topic=topic, 
-            stance=stance, 
+            topic=topic,
+            stance=stance,
             personality_description=personality_description
         )
         full_prompt = f"{system_prompt}\n\n---SOHBET GEÇMİŞİ---\n{conversation_history}\n\nYapay Zeka Münazırının sıradaki yanıtı:"
-        
+
         text_payload = {"contents": [{"role": "user", "parts": [{"text": full_prompt}]}]}
         text_response = requests.post(GEMINI_API_URL, json=text_payload)
         text_response.raise_for_status()
         result = text_response.json()
-        
+
         if 'candidates' not in result or not result['candidates']:
             return jsonify({"reply": "Yanıt alınamadı. Güvenlik ayarları nedeniyle engellenmiş olabilir."}), 200
 
@@ -155,6 +167,7 @@ def handle_debate():
         print(f"Sunucu Hatası: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/api/tts', methods=['POST'])
 def handle_tts():
     try:
@@ -162,13 +175,13 @@ def handle_tts():
         text_to_speak = data.get('text')
         if not text_to_speak:
             return jsonify({"error": "Metin gerekli."}), 400
-            
+
         tts_payload = {
             "contents": [{"parts": [{"text": text_to_speak}]}],
             "generationConfig": {"responseModalities": ["AUDIO"]},
             "model": "gemini-2.5-flash-preview-tts"
         }
-        
+
         tts_response = requests.post(TTS_API_URL, json=tts_payload)
         tts_response.raise_for_status()
         tts_result = tts_response.json()
@@ -185,6 +198,7 @@ def handle_tts():
         print(f"TTS Hatası: {e}")
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/api/report', methods=['POST'])
 def handle_report():
     try:
@@ -192,10 +206,12 @@ def handle_report():
         lang = data.get('lang', 'tr')
         messages = data.get('messages', [])
         topic = data.get('topic')
-        conversation_history = "\n".join([f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
+        conversation_history = "\n".join(
+            [f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
+
+        # 1. Generate Report
         report_prompt = prompts[lang]["report_system"].format(conversation_history=conversation_history)
-        
-        payload = {
+        report_payload = {
             "contents": [{"role": "user", "parts": [{"text": report_prompt}]}],
             "generationConfig": {
                 "responseMimeType": "application/json",
@@ -219,21 +235,50 @@ def handle_report():
                 }
             }
         }
-        
-        response = requests.post(GEMINI_API_URL, json=payload)
-        response.raise_for_status()
-        response_text = response.json()['candidates'][0]['content']['parts'][0]['text']
-        report_json = json.loads(response_text)
+        report_response = requests.post(GEMINI_API_URL, json=report_payload)
+        report_response.raise_for_status()
+        report_text = report_response.json()['candidates'][0]['content']['parts'][0]['text']
+        report_json = json.loads(report_text)
 
+        time.sleep(1)
+
+        # 2. Generate Schema
+        schema_prompt = prompts[lang]["schema_system"].format(conversation_history=conversation_history)
+        schema_payload = {"contents": [{"role": "user", "parts": [{"text": schema_prompt}]}]}
+        schema_response = requests.post(GEMINI_API_URL, json=schema_payload)
+        schema_response.raise_for_status()
+        schema_text = schema_response.json()['candidates'][0]['content']['parts'][0]['text']
+
+        # --- MORE ROBUST CLEANING LOGIC ---
+        cleaned_schema_string = schema_text.strip()
+
+        if "```mermaid" in cleaned_schema_string:
+            start = cleaned_schema_string.find("```mermaid") + len("```mermaid")
+            end = cleaned_schema_string.rfind("```")
+            if end > start:
+                cleaned_schema_string = cleaned_schema_string[start:end].strip()
+        elif "```" in cleaned_schema_string:
+            start = cleaned_schema_string.find("```") + len("```")
+            end = cleaned_schema_string.rfind("```")
+            if end > start:
+                cleaned_schema_string = cleaned_schema_string[start:end].strip()
+        else:
+            mermaid_keywords = ["graph", "flowchart", "sequenceDiagram", "gantt", "classDiagram", "stateDiagram"]
+            start_index = -1
+            for keyword in mermaid_keywords:
+                index = cleaned_schema_string.find(keyword)
+                if index != -1:
+                    if start_index == -1 or index < start_index:
+                        start_index = index
+
+            if start_index != -1:
+                cleaned_schema_string = cleaned_schema_string[start_index:]
+
+        cleaned_schema_string = cleaned_schema_string.strip()
+        schema_data = {"schema": cleaned_schema_string}
+
+        # 3. Save to DB if user is logged in
         if 'user_id' in session:
-            schema_prompt = prompts[lang]["schema_system"].format(conversation_history=conversation_history)
-            schema_payload = { "contents": [{"role": "user", "parts": [{"text": schema_prompt}]}] }
-            schema_response_req = requests.post(GEMINI_API_URL, json=schema_payload)
-            schema_response_req.raise_for_status()
-            schema_response_text = schema_response_req.json()['candidates'][0]['content']['parts'][0]['text']
-            cleaned_schema_string = schema_response_text.strip().replace("```mermaid", "").replace("```", "").strip()
-            schema_data = {"schema": cleaned_schema_string}
-
             new_debate = Debate(
                 user_id=session['user_id'],
                 topic=topic,
@@ -243,36 +288,24 @@ def handle_report():
             db.session.add(new_debate)
             db.session.commit()
 
-        return jsonify(report_json)
+        # 4. Return both report and schema
+        return jsonify({
+            "report": report_json,
+            "schema": schema_data
+        })
     except Exception as e:
+        print(f"Report/Schema Generation Error: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/schema', methods=['POST'])
-def handle_schema():
-    try:
-        data = request.json
-        lang = data.get('lang', 'tr')
-        messages = data.get('messages', [])
-        conversation_history = "\n".join([f"{'User' if m['author'] == 'user' else 'AI Debater'}: {m['text']}" for m in messages])
-        schema_prompt = prompts[lang]["schema_system"].format(conversation_history=conversation_history)
-        
-        payload = { "contents": [{"role": "user", "parts": [{"text": schema_prompt}]}] }
-        response = requests.post(GEMINI_API_URL, json=payload)
-        response.raise_for_status()
-        response_text = response.json()['candidates'][0]['content']['parts'][0]['text']
-        cleaned_schema_string = response_text.strip().replace("```mermaid", "").replace("```", "").strip()
-        return jsonify({"schema": cleaned_schema_string})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
     if 'user_id' not in session:
         return jsonify({"error": "Giriş yapılmamış."}), 401
-    
+
     user_id = session['user_id']
     debates = Debate.query.filter_by(user_id=user_id).order_by(Debate.timestamp.asc()).all()
-    
+
     history_data = [
         {
             "id": debate.id,
@@ -283,6 +316,7 @@ def get_history():
         } for debate in debates
     ]
     return jsonify(history_data)
+
 
 @app.route('/api/profile', methods=['GET'])
 def get_profile():
@@ -297,7 +331,7 @@ def get_profile():
 
     scores = []
     fallacies = {}
-    
+
     for debate in debates:
         report = json.loads(debate.report_data)
         scores.append(report.get('iknaEdicilikPuani', 0))
@@ -307,9 +341,9 @@ def get_profile():
 
     summary_data = f"Puanlar: {scores}, En sık yapılan hatalar: {fallacies}"
     lang = request.args.get('lang', 'tr')
-    
+
     profile_prompt = prompts[lang]["profile_system"].format(summary_data=summary_data)
-    
+
     payload = {
         "contents": [{"role": "user", "parts": [{"text": profile_prompt}]}],
         "generationConfig": {
@@ -331,7 +365,7 @@ def get_profile():
             }
         }
     }
-    
+
     response = requests.post(GEMINI_API_URL, json=payload)
     response.raise_for_status()
     response_text = response.json()['candidates'][0]['content']['parts'][0]['text']
