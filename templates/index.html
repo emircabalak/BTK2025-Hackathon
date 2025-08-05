@@ -11,55 +11,129 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .animate-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-slide-down { animation: slideDown 0.3s ease-out forwards; }
+
         body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
         .dark body { background-color: #111827; }
         .text-contrast { color: #1f2937; }
         .dark .text-contrast { color: #f9fafb; }
         .text-subtle { color: #4b5563; }
         .dark .text-subtle { color: #9ca3af; }
-        .moon-icon { transform: translate(-0.5px, 0); }
-        .theme-toggle-circle { transition: transform 0.3s ease-in-out; }
-        .theme-toggle-circle.light { transform: translateX(0); }
-        .theme-toggle-circle.dark { transform: translateX(30px); }
-        #schema-container svg { max-width: 100%; height: auto; }
-        .header-bg-light { background-color: rgba(255, 255, 255, 0.8); }
-        .dark .header-bg-light { background-color: rgba(31, 41, 55, 0.8); }
+
+        /* Enhanced button styles with better contrast */
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: 2px solid #0284c7;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-primary:disabled {
+            background: #9ca3af;
+            border-color: #9ca3af;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: 2px solid #4f46e5;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: 2px solid #dc2626;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Voice recording styles */
+        .recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            animation: pulse 1s infinite;
+        }
+
+        /* Navigation bar */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        .dark .nav-bar {
+            background: rgba(31, 41, 55, 0.95);
+            border-bottom-color: rgba(75, 85, 99, 0.8);
+        }
+
+        /* Theme toggle improvements */
+        .theme-toggle {
+            background: #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .dark .theme-toggle {
+            background: #374151;
+        }
+        .theme-toggle-circle {
+            transition: all 0.3s ease;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .dark .theme-toggle-circle {
+            background: #1f2937;
+            transform: translateX(28px);
+        }
+
+        #schema-container svg { width: 100%; height: auto; }
         .bg-debate-light { background-color: #ffffff; }
         .dark .bg-debate-light { background-color: #1f2937; }
         .card-bg { background-color: #f3f4f6; }
         .dark .card-bg { background-color: #374151; }
-        .message-input-bg { background-color: #f3f4f6; }
-        .dark .message-input-bg { background-color: #374151; }
+        .message-input-bg { background-color: #ffffff; border: 2px solid #e5e7eb; }
+        .dark .message-input-bg { background-color: #374151; border-color: #4b5563; }
         .ai-message-bg { background-color: #f3f4f6; }
         .dark .ai-message-bg { background-color: #374151; }
-        .topic-screen-bg { background-color: #f3f4f6; border-radius: 16px; padding: 24px; }
-        .dark .topic-screen-bg { background-color: #1f2937; }
-        .select-bg { background-color: #ffffff; border: 1px solid #d1d5db; }
-        .dark .select-bg { background-color: #374151; border-color: #4b5563; }
-        .custom-topic-bg { background-color: #ffffff; border: 1px solid #d1d5db; }
-        .dark .custom-topic-bg { background-color: #374151; border-color: #4b5563; }
-        .mic-recording {
-            animation: micPulse 1.5s infinite ease-in-out;
+        .topic-screen-bg {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
         }
-        @keyframes micPulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        .dark .topic-screen-bg {
+            background-color: #1f2937;
+            border-color: #374151;
         }
-        .spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+        .select-bg {
+            background-color: #ffffff;
+            border: 2px solid #d1d5db;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .dark .select-bg {
+            background-color: #374151;
+            border-color: #4b5563;
+        }
+        .custom-topic-bg {
+            background-color: #ffffff;
+            border: 2px solid #d1d5db;
+        }
+        .dark .custom-topic-bg {
+            background-color: #374151;
+            border-color: #4b5563;
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,55 +142,86 @@
 </head>
 <body class="text-contrast transition-colors duration-300">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div id="app-container" class="w-full max-w-2xl mx-auto bg-debate-light rounded-2xl shadow-lg flex flex-col" style="height: 90vh; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
-            <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between header-bg-light backdrop-blur-sm">
-                <div class="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500">
-                        <path d="M12 2a2.5 2.5 0 0 1 2.5 2.5v.75a2.5 2.5 0 0 1-5 0v-.75A2.5 2.5 0 0 1 12 2Z"/><path d="M4.5 9.5A2.5 2.5 0 0 0 7 12v0a2.5 2.5 0 0 0-2.5 2.5v0A2.5 2.5 0 0 0 7 17v0a2.5 2.5 0 0 0-2.5 2.5v0"/><path d="M19.5 9.5A2.5 2.5 0 0 1 17 12v0a2.5 2.5 0 0 1 2.5 2.5v0A2.5 2.5 0 0 1 17 17v0a2.5 2.5 0 0 1 2.5 2.5v0"/><path d="M12 12a2.5 2.5 0 0 0-2.5-2.5v0A2.5 2.5 0 0 0 7 7v0"/><path d="M12 12a2.5 2.5 0 0 1 2.5-2.5v0A2.5 2.5 0 0 1 17 7v0"/><path d="M12 12a2.5 2.5 0 0 0-2.5 2.5v0A2.5 2.5 0 0 0 7 17v0"/><path d="M12 12a2.5 2.5 0 0 1 2.5 2.5v0A2.5 2.5 0 0 1 17 17v0"/><path d="M12 4.75v3.5"/><path d="M7 9.5h10"/><path d="M7 14.5h10"/><path d="M12 17.25v3.5"/>
-                    </svg>
-                    <div>
-                        <h1 data-lang-key="appTitle" class="text-xl font-bold">Münazara Arenası</h1>
-                        <p data-lang-key="appSubtitle" class="text-sm text-subtle">Python & Flask Versiyonu</p>
-                    </div>
-                </div>
+    <!-- Navigation Bar -->
+    <nav class="nav-bar fixed top-0 left-0 right-0 z-50 animate-slide-down">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-4">
-                    <div id="user-info" class="hidden items-center space-x-2">
-                        <span id="username-display" class="text-sm font-medium"></span>
-                        <button data-action="show-history" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m3.9 16.2 5.1-5.1 4 4L18.3 9.8"/></svg></button>
-                        <button data-action="logout" class="p-2 rounded-full text-subtle hover:bg-gray-200 dark:hover:bg-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
-                    </div>
-                    <button data-action="toggle-theme" id="theme-toggle" type="button" class="relative p-1.5 w-[64px] rounded-full bg-gray-200 dark:bg-gray-700 flex items-center transition-colors duration-300 ease-in-out">
-                        <span id="toggle-circle" class="theme-toggle-circle w-7 h-7 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
-                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/></svg>
-                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 hidden moon-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                        </span>
-                    </button>
-                    <button data-action="toggle-lang" class="text-sm font-semibold text-subtle hover:text-cyan-500">EN</button>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500">
+                        <path d="M12 2a2.5 2.5 0 0 1 2.5 2.5v.75a2.5 2.5 0 0 1-5 0v-.75A2.5 2.5 0 0 1 12 2Z"/>
+                        <path d="M4.5 9.5A2.5 2.5 0 0 0 7 12v0a2.5 2.5 0 0 0-2.5 2.5v0A2.5 2.5 0 0 0 7 17v0a2.5 2.5 0 0 0-2.5 2.5v0"/>
+                        <path d="M19.5 9.5A2.5 2.5 0 0 1 17 12v0a2.5 2.5 0 0 1 2.5 2.5v0A2.5 2.5 0 0 1 17 17v0a2.5 2.5 0 0 1 2.5 2.5v0"/>
+                    </svg>
+                    <h1 class="text-xl font-bold">Münazara Arenası</h1>
                 </div>
-            </header>
 
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        🏛️ Münazara
+                    </a>
+                    <a href="/ogrenme-yollari" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        📚 Öğrenme Yolları
+                    </a>
+
+                    <div id="user-info" class="hidden items-center space-x-3">
+                        <span id="username-display" class="text-sm font-medium"></span>
+                        <button data-action="show-history" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"/><path d="m3.9 16.2 5.1-5.1 4 4L18.3 9.8"/>
+                            </svg>
+                        </button>
+                        <button data-action="logout" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" x2="9" y1="12" y2="12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="theme-toggle relative w-14 h-7 rounded-full p-1 transition-colors duration-300">
+                        <div class="theme-toggle-circle w-5 h-5 rounded-full flex items-center justify-center">
+                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-500">
+                                <circle cx="12" cy="12" r="5"/>
+                                <path d="M12 1v2"/><path d="M12 21v2"/>
+                                <path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/>
+                                <path d="M1 12h2"/><path d="M21 12h2"/>
+                                <path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/>
+                            </svg>
+                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-indigo-400 hidden">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button data-action="toggle-lang" class="text-sm font-semibold px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">EN</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="min-h-screen pt-16 flex flex-col items-center justify-center p-4">
+        <div id="app-container" class="w-full max-w-2xl mx-auto bg-debate-light rounded-2xl shadow-xl flex flex-col" style="height: 85vh; box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);">
             <main class="flex-grow p-6 overflow-y-auto">
+                <!-- Content will be loaded here -->
             </main>
         </div>
     </div>
-
-    <div id="pdf-render-container" style="position: absolute; top: 0; left: -9999px; padding: 20px;"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const state = {
                 topic: '',
                 stance: '',
-                personality: 'standard',
                 messages: [],
                 lang: 'tr',
-                theme: 'light',
+                theme: localStorage.getItem('theme') || 'light',
                 history: [],
                 currentReport: null,
                 currentSchema: null,
                 isRecording: false,
-                currentAudio: null,
+                recognition: null
             };
 
             const translations = {
@@ -133,14 +238,9 @@
                     stanceSelectLabel: "2. Tarafınızı Belirleyin",
                     stanceFor: "Savunuyorum",
                     stanceAgainst: "Karşı Çıkıyorum",
-                    personalitySelectLabel: "3. Yapay Zeka Kişiliğini Seçin",
-                    personalityStandard: "Standart",
-                    personalityAcademic: "Akademik",
-                    personalityAggressive: "Agresif",
-                    personalityCalm: "Sakin",
                     startDebate: "Münazarayı Başlat",
                     topicLabel: "Konu",
-                    messagePlaceholder: "Argümanınızı yazın veya mikrofona basın...",
+                    messagePlaceholder: "Argümanınızı yazın...",
                     endDebate: "Münazarayı Bitir ve Rapor Al",
                     reportTitle: "Performans Raporu",
                     scoreLabel: "İkna Edicilik Puanı",
@@ -150,7 +250,7 @@
                     suggestion: "Öneri",
                     evidenceUsage: "Kanıt Kullanımı ve Destekleme",
                     generalComment: "Genel Yorum",
-                    drawSchema: "Argüman Haritasını Görüntüle",
+                    drawSchema: "Argüman Haritasını Çiz",
                     downloadPDF: "Raporu ve Haritayı İndir",
                     newDebate: "Yeni Münazara Başlat",
                     schemaTitle: "Argüman Haritası",
@@ -158,7 +258,7 @@
                     pdfLoading: "PDF oluşturuluyor...",
                     errorTopic: "Lütfen bir konu ve taraf seçin.",
                     errorSendMessage: "Mesaj gönderilemedi",
-                    errorReport: "Rapor ve harita oluşturulamadı",
+                    errorReport: "Rapor oluşturulamadı",
                     errorSchema: "Şema verisi sunucudan alınamadı.",
                     errorSchemaInvalid: "Yapay zeka geçerli bir şema formatı döndürmedi.",
                     errorSchemaRender: "Argüman haritası çizilirken bir hata oluştu.",
@@ -181,79 +281,98 @@
                     commonFallacy: "En Sık Tekrarlanan Mantık Hatası",
                     debateStyle: "Münazara Stiliniz",
                     strength: "Güçlü Yönünüz",
-                    weakness: "Geliştirilecek Yönünüz"
+                    weakness: "Geliştirilecek Yönünüz",
+                    voiceStart: "Ses kaydını başlat",
+                    voiceStop: "Ses kaydını durdur",
+                    voiceNotSupported: "Ses tanıma desteklenmiyor"
                 },
                 en: {
                     appTitle: "Debate Arena",
-                    appSubtitle: "Python & Flask Version",
                     topicSelectLabel: "1. Select a Debate Topic",
-                    topicSelectPlaceholder: "Select a topic...",
-                    topic1: "Is artificial intelligence a threat to humanity?",
-                    topic2: "Should university education be free for everyone?",
-                    topic3: "Does social media positively affect society?",
-                    topicCustom: "I want to write my own topic...",
-                    customTopicPlaceholder: "Write your debate topic here",
-                    stanceSelectLabel: "2. Choose Your Stance",
                     stanceFor: "I'm For",
                     stanceAgainst: "I'm Against",
-                    personalitySelectLabel: "3. Select AI Personality",
-                    personalityStandard: "Standard",
-                    personalityAcademic: "Academic",
-                    personalityAggressive: "Aggressive",
-                    personalityCalm: "Calm",
                     startDebate: "Start Debate",
-                    topicLabel: "Topic",
-                    messagePlaceholder: "Write your argument or press the mic...",
-                    endDebate: "End Debate & Get Report",
-                    reportTitle: "Performance Report",
-                    scoreLabel: "Persuasiveness Score",
-                    strongestArgument: "Your Strongest Argument",
-                    improvementArea: "Area for Improvement",
-                    exampleSentence: "Your Example Sentence",
-                    suggestion: "Suggestion",
-                    evidenceUsage: "Use of Evidence and Support",
-                    generalComment: "General Feedback",
-                    drawSchema: "View Argument Map",
-                    downloadPDF: "Download Report & Map",
-                    newDebate: "Start New Debate",
-                    schemaTitle: "Argument Map",
-                    backToReport: "Back to Report",
-                    pdfLoading: "Generating PDF...",
-                    errorTopic: "Please select a topic and a stance.",
-                    errorSendMessage: "Could not send message",
-                    errorReport: "Could not generate report and map",
-                    errorSchema: "Could not fetch schema data from server.",
-                    errorSchemaInvalid: "AI did not return a valid schema format.",
-                    errorSchemaRender: "An error occurred while drawing the argument map.",
-                    errorPDF: "An error occurred while generating the PDF",
-                    loginTitle: "Login",
-                    registerTitle: "Register",
-                    usernamePlaceholder: "Username",
-                    passwordPlaceholder: "Password",
-                    loginButton: "Login",
-                    registerButton: "Register",
-                    guestButton: "Continue as Guest",
-                    showRegister: "Don't have an account? Register",
-                    showLogin: "Already have an account? Login",
-                    historyTitle: "Debate History",
-                    backToMain: "Back to Main Menu",
-                    analyzeProfile: "Analyze My Profile",
-                    profileTitle: "Debater Profile",
-                    profileError: "You need to complete at least 3 debates for a profile analysis.",
-                    progressChart: "Progress Chart",
-                    commonFallacy: "Most Common Logical Fallacy",
-                    debateStyle: "Your Debate Style",
-                    strength: "Your Strength",
-                    weakness: "Area to Improve"
+                    messagePlaceholder: "Write your argument...",
+                    voiceStart: "Start voice recording",
+                    voiceStop: "Stop voice recording",
+                    voiceNotSupported: "Voice recognition not supported"
                 }
             };
 
             const mainContent = document.querySelector('main');
 
+            // Initialize Speech Recognition
+            function initSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    state.recognition = new SpeechRecognition();
+                    state.recognition.continuous = true;
+                    state.recognition.interimResults = true;
+                    state.recognition.lang = state.lang === 'tr' ? 'tr-TR' : 'en-US';
+
+                    state.recognition.onresult = function(event) {
+                        let finalTranscript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                finalTranscript += event.results[i][0].transcript;
+                            }
+                        }
+
+                        if (finalTranscript) {
+                            const messageInput = document.getElementById('message-input');
+                            if (messageInput) {
+                                messageInput.value = (messageInput.value + ' ' + finalTranscript).trim();
+                            }
+                        }
+                    };
+
+                    state.recognition.onerror = function(event) {
+                        console.error('Speech recognition error:', event.error);
+                        stopVoiceRecording();
+                    };
+
+                    state.recognition.onend = function() {
+                        stopVoiceRecording();
+                    };
+                }
+            }
+
+            function startVoiceRecording() {
+                if (state.recognition && !state.isRecording) {
+                    state.isRecording = true;
+                    state.recognition.start();
+
+                    const voiceBtn = document.getElementById('voice-btn');
+                    if (voiceBtn) {
+                        voiceBtn.classList.add('recording');
+                        voiceBtn.title = translations[state.lang].voiceStop;
+                    }
+                }
+            }
+
+            function stopVoiceRecording() {
+                if (state.recognition && state.isRecording) {
+                    state.isRecording = false;
+                    state.recognition.stop();
+
+                    const voiceBtn = document.getElementById('voice-btn');
+                    if (voiceBtn) {
+                        voiceBtn.classList.remove('recording');
+                        voiceBtn.title = translations[state.lang].voiceStart;
+                    }
+                }
+            }
+
             function setLanguage(lang) {
                 state.lang = lang;
                 localStorage.setItem('lang', lang);
                 document.documentElement.lang = lang;
+
+                // Update speech recognition language
+                if (state.recognition) {
+                    state.recognition.lang = lang === 'tr' ? 'tr-TR' : 'en-US';
+                }
+
                 document.querySelectorAll('[data-lang-key]').forEach(el => {
                     const key = el.dataset.langKey;
                     const translation = translations[lang][key];
@@ -272,50 +391,39 @@
             function setTheme(theme) {
                 state.theme = theme;
                 localStorage.setItem('theme', theme);
-                const toggleCircle = document.getElementById('toggle-circle');
-                const lightIcon = document.getElementById('theme-icon-light');
-                const darkIcon = document.getElementById('theme-icon-dark');
 
                 if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                    if(toggleCircle) toggleCircle.classList.add('dark');
-                    if(toggleCircle) toggleCircle.classList.remove('light');
-                    if(lightIcon) lightIcon.classList.add('hidden');
-                    if(darkIcon) darkIcon.classList.remove('hidden');
+                    document.getElementById('theme-icon-light').classList.add('hidden');
+                    document.getElementById('theme-icon-dark').classList.remove('hidden');
                 } else {
                     document.documentElement.classList.remove('dark');
-                    if(toggleCircle) toggleCircle.classList.add('light');
-                    if(toggleCircle) toggleCircle.classList.remove('dark');
-                    if(lightIcon) lightIcon.classList.remove('hidden');
-                    if(darkIcon) darkIcon.classList.add('hidden');
+                    document.getElementById('theme-icon-light').classList.remove('hidden');
+                    document.getElementById('theme-icon-dark').classList.add('hidden');
                 }
-                const mermaidTheme = theme === 'dark' ? 'dark' : 'default';
-                mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
+
+                if (typeof mermaid !== 'undefined') {
+                    mermaid.initialize({ startOnLoad: false, theme: theme });
+                }
             }
 
             function showScreen(htmlContent) {
                 mainContent.innerHTML = htmlContent;
                 setLanguage(state.lang);
+
+                // Reinitialize speech recognition after screen change
+                initSpeechRecognition();
             }
 
             function updateMessages() {
                 const messagesContainer = document.getElementById('messages-container');
                 if (!messagesContainer) return;
-                messagesContainer.innerHTML = state.messages.map((msg, index) => `
+                messagesContainer.innerHTML = state.messages.map(msg => `
                     <div class="flex items-start gap-3 animate-fade-in ${msg.author === 'user' ? 'justify-end' : 'justify-start'}">
-                        ${msg.author === 'ai' ? `
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-                            </div>` : ''}
-                        <div class="max-w-md p-3 rounded-xl ${msg.author === 'user' ? 'bg-cyan-600 text-white rounded-br-none' : 'ai-message-bg text-contrast rounded-bl-none'}">
-                            <p class="text-sm" style="white-space: pre-wrap;">${msg.text}</p>
+                        ${msg.author === 'ai' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-600 dark:text-cyan-400"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>' : ''}
+                        <div class="max-w-md p-4 rounded-2xl ${msg.author === 'user' ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-br-md' : 'ai-message-bg text-contrast rounded-bl-md border'}">
+                            <p class="text-sm leading-relaxed" style="white-space: pre-wrap;">${msg.text}</p>
                         </div>
-                        ${msg.author === 'ai' ? `
-                            <button data-action="generate-and-play-audio" data-message-index="${index}" class="p-2 rounded-full text-subtle self-center hover:bg-gray-200 dark:hover:bg-gray-600">
-                                <svg class="speaker-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                                <div class="spinner hidden"></div>
-                            </button>
-                        ` : ''}
                         ${msg.author === 'user' ? '<div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 dark:text-gray-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' : ''}
                     </div>
                 `).join('');
@@ -323,7 +431,7 @@
             }
 
             function addMessage(author, text) {
-                state.messages.push({ author, text, audio: null });
+                state.messages.push({ author, text });
                 updateMessages();
             }
 
@@ -340,10 +448,10 @@
                         loadingEl.id = 'loading-indicator';
                         loadingEl.innerHTML = `
                             <div class="flex items-start gap-3 justify-start">
-                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-500"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>
-                                <div class="max-w-md p-3 rounded-xl ai-message-bg text-contrast rounded-bl-none">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-600 dark:text-cyan-400"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></div>
+                                <div class="max-w-md p-4 rounded-2xl ai-message-bg text-contrast rounded-bl-md border">
                                     <div class="flex items-center space-x-2"><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></div><div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></div></div>
-                                    ${message ? `<p class="text-sm ml-2">${message}</p>` : ''}
+                                    ${message ? `<p class="text-sm mt-2">${message}</p>` : ''}
                                 </div>
                             </div>`;
                         messagesContainer.appendChild(loadingEl);
@@ -357,14 +465,19 @@
             function renderLoginScreen() {
                 const html = `
                     <div id="login-screen" class="flex flex-col h-full justify-center animate-fade-in">
-                        <div class="topic-screen-bg space-y-4">
-                            <h2 data-lang-key="loginTitle" class="text-2xl font-bold text-center">Giriş Yap</h2>
-                            <input id="login-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
-                            <input id="login-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                        <div class="topic-screen-bg space-y-6">
+                            <div class="text-center mb-6">
+                                <h2 data-lang-key="loginTitle" class="text-3xl font-bold text-contrast">Giriş Yap</h2>
+                                <p class="text-subtle mt-2">Hesabınıza giriş yapın veya misafir olarak devam edin</p>
+                            </div>
+                            <input id="login-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-4 custom-topic-bg rounded-xl text-contrast focus:ring-2 focus:ring-cyan-500 transition-all">
+                            <input id="login-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-4 custom-topic-bg rounded-xl text-contrast focus:ring-2 focus:ring-cyan-500 transition-all">
                             <p id="auth-error" class="text-red-500 text-sm text-center h-4"></p>
-                            <button data-action="login" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="loginButton">Giriş Yap</span></button>
-                            <button data-action="guest-login" class="w-full p-3 bg-gray-500 text-white font-bold rounded-lg"><span data-lang-key="guestButton">Misafir Olarak Devam Et</span></button>
-                            <p class="text-center text-sm"><button data-action="show-register" class="text-cyan-500 hover:underline"><span data-lang-key="showRegister">Hesabın yok mu? Kayıt ol</span></button></p>
+                            <div class="space-y-3">
+                                <button data-action="login" class="btn-primary w-full p-4 text-white font-bold rounded-xl transition-all"><span data-lang-key="loginButton">Giriş Yap</span></button>
+                                <button data-action="guest-login" class="btn-secondary w-full p-4 text-white font-bold rounded-xl transition-all"><span data-lang-key="guestButton">Misafir Olarak Devam Et</span></button>
+                            </div>
+                            <p class="text-center text-sm"><button data-action="show-register" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium"><span data-lang-key="showRegister">Hesabın yok mu? Kayıt ol</span></button></p>
                         </div>
                     </div>
                 `;
@@ -374,13 +487,16 @@
             function renderRegisterScreen() {
                 const html = `
                     <div id="register-screen" class="flex flex-col h-full justify-center animate-fade-in">
-                        <div class="topic-screen-bg space-y-4">
-                            <h2 data-lang-key="registerTitle" class="text-2xl font-bold text-center">Kayıt Ol</h2>
-                            <input id="register-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
-                            <input id="register-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-3 custom-topic-bg rounded-lg text-contrast">
+                        <div class="topic-screen-bg space-y-6">
+                            <div class="text-center mb-6">
+                                <h2 data-lang-key="registerTitle" class="text-3xl font-bold text-contrast">Kayıt Ol</h2>
+                                <p class="text-subtle mt-2">Yeni hesap oluşturun</p>
+                            </div>
+                            <input id="register-username" type="text" data-lang-key="usernamePlaceholder" placeholder="Kullanıcı Adı" class="w-full p-4 custom-topic-bg rounded-xl text-contrast focus:ring-2 focus:ring-cyan-500 transition-all">
+                            <input id="register-password" type="password" data-lang-key="passwordPlaceholder" placeholder="Şifre" class="w-full p-4 custom-topic-bg rounded-xl text-contrast focus:ring-2 focus:ring-cyan-500 transition-all">
                             <p id="auth-error" class="text-red-500 text-sm text-center h-4"></p>
-                            <button data-action="register" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="registerButton">Kayıt Ol</span></button>
-                            <p class="text-center text-sm"><button data-action="show-login" class="text-cyan-500 hover:underline"><span data-lang-key="showLogin">Zaten hesabın var mı? Giriş yap</span></button></p>
+                            <button data-action="register" class="btn-primary w-full p-4 text-white font-bold rounded-xl transition-all"><span data-lang-key="registerButton">Kayıt Ol</span></button>
+                            <p class="text-center text-sm"><button data-action="show-login" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium"><span data-lang-key="showLogin">Zaten hesabın var mı? Giriş yap</span></button></p>
                         </div>
                     </div>
                 `;
@@ -409,10 +525,23 @@
             function renderTopicScreen() {
                 const html = `
                     <div id="topic-screen" class="flex flex-col h-full justify-center animate-fade-in">
-                        <div class="topic-screen-bg space-y-6">
+                        <div class="topic-screen-bg space-y-8">
+                            <!-- Learning Paths Banner -->
+                            <div class="p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl text-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-bold text-xl mb-2">🎓 Kişiselleştirilmiş Öğrenme</h3>
+                                        <p class="text-white/90 text-sm">Seviyenize uygun öğrenme yolları keşfedin</p>
+                                    </div>
+                                    <a href="/ogrenme-yollari" class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105">
+                                        Başla →
+                                    </a>
+                                </div>
+                            </div>
+
                             <div>
-                                <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-sm font-medium text-subtle mb-2">1. Bir Münazara Konusu Seçin</label>
-                                <select id="topic-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
+                                <label for="topic-select" data-lang-key="topicSelectLabel" class="block text-lg font-semibold text-contrast mb-4">1. Bir Münazara Konusu Seçin</label>
+                                <select id="topic-select" class="w-full p-4 select-bg rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast text-lg">
                                     <option value="" disabled selected data-lang-key="topicSelectPlaceholder">Konu seç...</option>
                                     <option value="Yapay zeka insanlık için bir tehdit mi?" data-lang-key="topic1">Yapay zeka insanlık için bir tehdit mi?</option>
                                     <option value="Üniversite eğitimi herkes için ücretsiz mi olmalı?" data-lang-key="topic2">Üniversite eğitimi herkes için ücretsiz mi olmalı?</option>
@@ -421,30 +550,23 @@
                                 </select>
                             </div>
                             <div id="custom-topic-container" class="hidden">
-                                <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-3 custom-topic-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
+                                <input type="text" id="custom-topic-input" data-lang-key="customTopicPlaceholder" placeholder="Münazara konunuzu buraya yazın" class="w-full p-4 custom-topic-bg rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast text-lg" />
                             </div>
                             <div>
-                                <h3 data-lang-key="stanceSelectLabel" class="block text-sm font-medium text-subtle mb-2">2. Tarafınızı Belirleyin</h3>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <button data-action="set-stance" data-stance="savunuyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                <h3 data-lang-key="stanceSelectLabel" class="block text-lg font-semibold text-contrast mb-4">2. Tarafınızı Belirleyin</h3>
+                                <div class="grid grid-cols-2 gap-6">
+                                    <button data-action="set-stance" data-stance="savunuyorum" class="p-6 rounded-xl text-center transition-all card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-semibold text-lg border-2 border-transparent hover:border-green-400 hover:shadow-lg">
+                                        <div class="text-2xl mb-2">✅</div>
                                         <span data-lang-key="stanceFor">Savunuyorum</span>
                                     </button>
-                                    <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-4 rounded-lg text-center transition card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium">
+                                    <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-6 rounded-xl text-center transition-all card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-semibold text-lg border-2 border-transparent hover:border-red-400 hover:shadow-lg">
+                                        <div class="text-2xl mb-2">❌</div>
                                         <span data-lang-key="stanceAgainst">Karşı Çıkıyorum</span>
                                     </button>
                                 </div>
                             </div>
-                            <div>
-                                <label for="personality-select" data-lang-key="personalitySelectLabel" class="block text-sm font-medium text-subtle mb-2">3. Yapay Zeka Kişiliğini Seçin</label>
-                                <select id="personality-select" class="w-full p-3 select-bg rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast">
-                                    <option value="standard" selected data-lang-key="personalityStandard">Standart</option>
-                                    <option value="academic" data-lang-key="personalityAcademic">Akademik</option>
-                                    <option value="aggressive" data-lang-key="personalityAggressive">Agresif</option>
-                                    <option value="calm" data-lang-key="personalityCalm">Sakin</option>
-                                </select>
-                            </div>
                             <p id="error-message" class="text-red-500 dark:text-red-400 text-sm text-center h-4"></p>
-                            <button data-action="start-debate" id="start-debate-btn" class="w-full p-4 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-bold text-white text-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg" disabled>
+                            <button data-action="start-debate" id="start-debate-btn" class="btn-primary w-full p-5 text-white font-bold rounded-xl text-xl transition-all disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                                 <span data-lang-key="startDebate">Münazarayı Başlat</span>
                             </button>
                         </div>
@@ -453,7 +575,6 @@
                 showScreen(html);
                 const topicSelect = document.getElementById('topic-select');
                 const customTopicInput = document.getElementById('custom-topic-input');
-                const personalitySelect = document.getElementById('personality-select');
 
                 topicSelect.addEventListener('change', function() {
                     if (this.value === 'custom') {
@@ -474,10 +595,6 @@
                     });
                 }
 
-                personalitySelect.addEventListener('change', function() {
-                    state.personality = this.value;
-                });
-
                 state.topic = topicSelect.value === 'custom' ? '' : topicSelect.value;
                 checkCanStart();
             }
@@ -485,22 +602,30 @@
             function renderDebateScreen() {
                 const html = `
                     <div id="debate-screen" class="flex flex-col h-full">
-                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 header-bg-light backdrop-blur-sm -mx-6 -mt-6 mb-4 sticky top-0 z-10">
-                            <h3 id="debate-topic-header" class="text-center font-semibold text-subtle"><span data-lang-key="topicLabel">Konu</span>: <span class="text-cyan-600 dark:text-cyan-400">${state.topic}</span></h3>
+                        <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 -mx-6 -mt-6 mb-6 rounded-t-2xl">
+                            <h3 id="debate-topic-header" class="text-center font-bold text-lg text-contrast"><span data-lang-key="topicLabel">Konu</span>: <span class="text-cyan-600 dark:text-cyan-400">${state.topic}</span></h3>
                         </div>
                         <div id="messages-container" class="flex-grow overflow-y-auto pr-4 -mr-4 space-y-6">
                         </div>
-                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center space-x-2">
-                                <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın veya mikrofona basın..." class="flex-grow p-3 message-input-bg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast" />
-                                <button data-action="toggle-mic" id="mic-btn" class="p-3 bg-gray-500 hover:bg-gray-600 rounded-lg transition shadow">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="23"/><line x1="8" x2="16" y1="23" y2="23"/></svg>
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <input type="text" id="message-input" data-lang-key="messagePlaceholder" placeholder="Argümanınızı yazın..." class="flex-grow p-4 message-input-bg rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition text-contrast text-lg" />
+                                <button id="voice-btn" class="p-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl transition-all" title="${translations[state.lang].voiceStart}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                                        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                                        <line x1="12" x2="12" y1="19" y2="22"/>
+                                        <line x1="8" x2="16" y1="22" y2="22"/>
+                                    </svg>
                                 </button>
-                                <button data-action="send-message" id="send-btn" class="p-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                <button data-action="send-message" id="send-btn" class="btn-primary p-4 text-white rounded-xl transition-all disabled:bg-gray-500 dark:disabled:bg-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none">
+                                        <path d="m22 2-7 20-4-9-9-4Z"/>
+                                        <path d="M22 2 11 13"/>
+                                    </svg>
                                 </button>
                             </div>
-                            <button data-action="end-debate" id="end-debate-btn" class="w-full mt-3 p-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition disabled:bg-gray-500 dark:disabled:bg-gray-600 shadow-md hover:shadow-lg">
+                            <button data-action="end-debate" id="end-debate-btn" class="btn-danger w-full p-4 text-white rounded-xl font-bold transition-all disabled:bg-gray-500 dark:disabled:bg-gray-600">
                                 <span data-lang-key="endDebate">Münazarayı Bitir ve Rapor Al</span>
                             </button>
                         </div>
@@ -509,57 +634,78 @@
                 showScreen(html);
                 updateMessages();
 
+                // Voice button functionality
+                const voiceBtn = document.getElementById('voice-btn');
+                if (voiceBtn) {
+                    voiceBtn.addEventListener('click', function() {
+                        if (state.isRecording) {
+                            stopVoiceRecording();
+                        } else {
+                            startVoiceRecording();
+                        }
+                    });
+                }
+
                 const messageInput = document.getElementById('message-input');
                 if (messageInput) {
                     messageInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
                             document.querySelector('[data-action="send-message"]').click();
                         }
                     });
                 }
             }
 
-            function renderReportScreen(report, schema) {
+            function renderReportScreen(report) {
                 state.currentReport = report;
-                state.currentSchema = schema;
                 const score = report.iknaEdicilikPuani || 0;
                 const html = `
-                    <div id="report-screen-content" class="flex flex-col h-full animate-fade-in">
-                        <div id="report-content" class="space-y-6 pt-4 flex-grow overflow-y-auto pr-2">
-                            <h2 data-lang-key="reportTitle" class="text-3xl font-bold text-center text-cyan-600 dark:text-cyan-400">Performans Raporu</h2>
+                    <div id="report-screen-content" class="flex flex-col h-full justify-center animate-fade-in">
+                        <div id="report-content" class="space-y-8">
+                            <h2 data-lang-key="reportTitle" class="text-4xl font-bold text-center bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Performans Raporu</h2>
                             <div class="relative flex justify-center items-center">
-                                <svg class="transform -rotate-90" width="120" height="120" viewBox="0 0 120 120">
-                                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-700" stroke-width="12" />
-                                    <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-cyan-500" stroke-width="12" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - (score / 10)}" />
+                                <svg class="transform -rotate-90" width="140" height="140" viewBox="0 0 140 140">
+                                    <circle cx="70" cy="70" r="60" fill="none" stroke="currentColor" class="text-gray-200 dark:text-gray-700" stroke-width="8" />
+                                    <circle cx="70" cy="70" r="60" fill="none" stroke="url(#gradient)" stroke-width="8" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - (score / 10)}" stroke-linecap="round" />
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
                                 </svg>
-                                <span class="absolute text-3xl font-bold">${score}<span class="text-lg">/10</span></span>
+                                <span class="absolute text-4xl font-bold">${score}<span class="text-xl">/10</span></span>
                             </div>
-                            <p data-lang-key="scoreLabel" class="text-center text-lg font-semibold text-subtle">İkna Edicilik Puanı</p>
-                            <div class="space-y-4">
-                                <div class="p-4 card-bg rounded-lg shadow-sm">
-                                    <h3 data-lang-key="strongestArgument" class="font-semibold text-green-600 dark:text-green-400 mb-2">En Güçlü Argümanınız</h3>
-                                    <p class="text-sm">${report.enGucluArguman || '...'}</p>
+                            <p data-lang-key="scoreLabel" class="text-center text-xl font-semibold text-subtle">İkna Edicilik Puanı</p>
+                            <div class="space-y-6">
+                                <div class="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
+                                    <h3 data-lang-key="strongestArgument" class="font-bold text-green-700 dark:text-green-400 mb-3 text-lg">En Güçlü Argümanınız</h3>
+                                    <p class="text-sm leading-relaxed">${report.enGucluArguman || '...'}</p>
                                 </div>
-                                <div class="p-4 card-bg rounded-lg shadow-sm">
-                                    <h3 class="font-semibold text-yellow-600 dark:text-yellow-400 mb-2"><span data-lang-key="improvementArea">Geliştirilmesi Gereken Nokta</span>: ${report.gelistirilmesiGerekenNokta?.tespitEdilenHataTuru || 'Genel'}</h3>
-                                    <p class="text-sm text-subtle mt-1 mb-2"><em>${report.gelistirilmesiGerekenNokta?.hataTanimi || ''}</em></p>
-                                    <p class="text-sm border-l-4 border-yellow-500 dark:border-yellow-400 pl-3"><strong><span data-lang-key="exampleSentence">Örnek Cümleniz</span>:</strong> "${report.gelistirilmesiGerekenNokta?.ornekCumle || '...'}"</p>
-                                    <p class="text-sm mt-2"><strong><span data-lang-key="suggestion">Öneri</span>:</strong> ${report.gelistirilmesiGerekenNokta?.onerilenGelistirme || '...'}</p>
+                                <div class="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border border-yellow-200 dark:border-yellow-800">
+                                    <h3 class="font-bold text-yellow-700 dark:text-yellow-400 mb-3 text-lg"><span data-lang-key="improvementArea">Geliştirilmesi Gereken Nokta</span>: ${report.gelistirilmesiGerekenNokta?.tespitEdilenHataTuru || 'Genel'}</h3>
+                                    <p class="text-sm text-subtle mb-3"><em>${report.gelistirilmesiGerekenNokta?.hataTanimi || ''}</em></p>
+                                    <div class="bg-white/50 dark:bg-gray-800/50 p-4 rounded-xl mb-3">
+                                        <p class="text-sm"><strong><span data-lang-key="exampleSentence">Örnek Cümleniz</span>:</strong></p>
+                                        <p class="text-sm italic mt-1">"${report.gelistirilmesiGerekenNokta?.ornekCumle || '...'}"</p>
+                                    </div>
+                                    <p class="text-sm"><strong><span data-lang-key="suggestion">Öneri</span>:</strong> ${report.gelistirilmesiGerekenNokta?.onerilenGelistirme || '...'}</p>
                                 </div>
-                                <div class="p-4 card-bg rounded-lg shadow-sm">
-                                    <h3 data-lang-key="evidenceUsage" class="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Kanıt Kullanımı ve Destekleme</h3>
-                                    <p class="text-sm">${report.kanitKullanimi || '...'}</p>
+                                <div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800">
+                                    <h3 data-lang-key="evidenceUsage" class="font-bold text-indigo-700 dark:text-indigo-400 mb-3 text-lg">Kanıt Kullanımı ve Destekleme</h3>
+                                    <p class="text-sm leading-relaxed">${report.kanitKullanimi || '...'}</p>
                                 </div>
-                                <div class="p-4 card-bg rounded-lg shadow-sm">
-                                    <h3 data-lang-key="generalComment" class="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Genel Yorum</h3>
-                                    <p class="text-sm">${report.genelYorum || '...'}</p>
+                                <div class="p-6 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-2xl border border-cyan-200 dark:border-cyan-800">
+                                    <h3 data-lang-key="generalComment" class="font-bold text-cyan-700 dark:text-cyan-400 mb-3 text-lg">Genel Yorum</h3>
+                                    <p class="text-sm leading-relaxed">${report.genelYorum || '...'}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-6 space-y-3">
-                            <button data-action="draw-schema" class="w-full p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="drawSchema">Argüman Haritasını Görüntüle</span></button>
-                            <button data-action="download-pdf" class="w-full p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="downloadPDF">Raporu ve Haritayı İndir</span></button>
-                            <button data-action="new-debate" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg"><span data-lang-key="newDebate">Yeni Münazara Başlat</span></button>
+                        <div class="mt-8 space-y-4">
+                            <button data-action="draw-schema" class="btn-secondary w-full p-4 text-white rounded-xl font-bold transition-all"><span data-lang-key="drawSchema">Argüman Haritasını Çiz</span></button>
+                            <button data-action="download-pdf" class="w-full p-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-bold transition-all"><span data-lang-key="downloadPDF">Raporu ve Haritayı İndir</span></button>
+                            <button data-action="new-debate" class="btn-primary w-full p-4 text-white rounded-xl font-bold transition-all"><span data-lang-key="newDebate">Yeni Münazara Başlat</span></button>
                         </div>
                     </div>
                 `;
@@ -570,11 +716,11 @@
                 state.currentSchema = schemaData;
                 const html = `
                     <div id="schema-screen" class="flex flex-col h-full">
-                        <h2 data-lang-key="schemaTitle" class="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-4">Argüman Haritası</h2>
-                        <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-4 rounded-lg overflow-auto flex justify-center items-center">
+                        <h2 data-lang-key="schemaTitle" class="text-3xl font-bold text-center bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-6">Argüman Haritası</h2>
+                        <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-6 rounded-2xl overflow-auto border">
                         </div>
-                        <div class="mt-4">
-                            <button data-action="back-to-report" class="w-full p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-bold transition shadow-md hover:shadow-lg">
+                        <div class="mt-6">
+                            <button data-action="back-to-report" class="btn-primary w-full p-4 text-white rounded-xl font-bold transition-all">
                                 <span data-lang-key="backToReport">Rapora Geri Dön</span>
                             </button>
                         </div>
@@ -583,7 +729,7 @@
                 showScreen(html);
                 const schemaContainer = document.getElementById('schema-container');
                 try {
-                    if (schemaData && schemaData.schema && schemaData.schema.trim()) {
+                    if (schemaData && schemaData.schema) {
                         mermaid.render('mermaid-graph', schemaData.schema, (svg) => {
                             schemaContainer.innerHTML = svg;
                         });
@@ -592,27 +738,31 @@
                     }
                 } catch (error) {
                     console.error("Mermaid render error:", error);
-                    schemaContainer.innerHTML = `<p class="text-red-500 text-center">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2 text-center">${error.message}</p>`;
+                    schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
                 }
             }
 
             function renderHistoryScreen(history) {
                 const historyItems = history.map(item => `
-                    <div data-action="view-history-item" data-id="${item.id}" class="p-4 card-bg rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                        <p class="font-semibold text-contrast">${item.topic}</p>
-                        <p class="text-sm text-subtle">${item.timestamp}</p>
+                    <div data-action="view-history-item" data-id="${item.id}" class="p-6 card-bg rounded-2xl cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-all hover:shadow-lg border">
+                        <p class="font-bold text-contrast text-lg">${item.topic}</p>
+                        <p class="text-sm text-subtle mt-2">${item.timestamp}</p>
+                        <div class="flex items-center mt-3">
+                            <div class="w-8 h-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full mr-3"></div>
+                            <span class="text-sm font-medium">${item.report.iknaEdicilikPuani || 0}/10 puan</span>
+                        </div>
                     </div>
                 `).join('');
 
                 const html = `
                     <div id="history-screen" class="flex flex-col h-full animate-fade-in">
-                        <h2 data-lang-key="historyTitle" class="text-2xl font-bold text-center mb-4">Münazara Geçmişi</h2>
-                        <div class="flex-grow space-y-3 overflow-y-auto">
-                            ${history.length > 0 ? historyItems : `<p class="text-center text-subtle">Henüz bir münazara tamamlamadınız.</p>`}
+                        <h2 data-lang-key="historyTitle" class="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Münazara Geçmişi</h2>
+                        <div class="flex-grow space-y-4 overflow-y-auto">
+                            ${history.length > 0 ? historyItems : `<div class="text-center py-12"><p class="text-subtle text-lg">Henüz bir münazara tamamlamadınız.</p></div>`}
                         </div>
-                        <div class="mt-4 space-y-3">
-                            <button data-action="analyze-profile" class="w-full p-3 bg-teal-600 text-white font-bold rounded-lg disabled:bg-gray-500" ${history.length < 3 ? 'disabled' : ''}><span data-lang-key="analyzeProfile">Profilimi Analiz Et</span></button>
-                            <button data-action="back-to-main" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg"><span data-lang-key="backToMain">Ana Menüye Dön</span></button>
+                        <div class="mt-6 space-y-4">
+                            <button data-action="analyze-profile" class="btn-secondary w-full p-4 text-white font-bold rounded-xl transition-all disabled:bg-gray-500" ${history.length < 3 ? 'disabled' : ''}><span data-lang-key="analyzeProfile">Profilimi Analiz Et</span></button>
+                            <button data-action="back-to-main" class="btn-primary w-full p-4 text-white font-bold rounded-xl transition-all"><span data-lang-key="backToMain">Ana Menüye Dön</span></button>
                         </div>
                     </div>
                 `;
@@ -622,34 +772,34 @@
             function renderProfileScreen(profile) {
                 const html = `
                     <div id="profile-screen" class="flex flex-col h-full animate-fade-in">
-                        <h2 data-lang-key="profileTitle" class="text-2xl font-bold text-center mb-4">Münazır Profili</h2>
-                        <div class="flex-grow space-y-4 overflow-y-auto p-1">
-                            <div class="p-4 card-bg rounded-lg">
-                                <h3 data-lang-key="progressChart" class="font-semibold text-contrast mb-2">Gelişim Grafiği</h3>
+                        <h2 data-lang-key="profileTitle" class="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Münazır Profili</h2>
+                        <div class="flex-grow space-y-6 overflow-y-auto p-1">
+                            <div class="p-6 card-bg rounded-2xl border">
+                                <h3 data-lang-key="progressChart" class="font-bold text-contrast mb-4 text-lg">Gelişim Grafiği</h3>
                                 <canvas id="progressChart"></canvas>
                             </div>
-                            <div class="p-4 card-bg rounded-lg">
-                                <h3 data-lang-key="commonFallacy" class="font-semibold text-contrast mb-2">En Sık Tekrarlanan Mantık Hatası</h3>
-                                <p class="font-bold text-yellow-500">${profile.enSikHata?.hataTuru || 'Belirlenmedi'}</p>
-                                <p class="text-sm text-subtle mt-1">${profile.enSikHata?.tavsiye || 'Tavsiye bulunamadı.'}</p>
+                            <div class="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border border-yellow-200 dark:border-yellow-800">
+                                <h3 data-lang-key="commonFallacy" class="font-bold text-yellow-700 dark:text-yellow-400 mb-3 text-lg">En Sık Tekrarlanan Mantık Hatası</h3>
+                                <p class="font-bold text-yellow-600 dark:text-yellow-300 text-xl">${profile.enSikHata?.hataTuru || 'Belirlenmedi'}</p>
+                                <p class="text-sm text-subtle mt-2">${profile.enSikHata?.tavsiye || 'Tavsiye bulunamadı.'}</p>
                             </div>
-                            <div class="p-4 card-bg rounded-lg">
-                                <h3 data-lang-key="debateStyle" class="font-semibold text-contrast mb-2">Münazara Stiliniz</h3>
-                                <p class="text-sm">${profile.munazaraStili || 'Analiz ediliyor...'}</p>
+                            <div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800">
+                                <h3 data-lang-key="debateStyle" class="font-bold text-indigo-700 dark:text-indigo-400 mb-3 text-lg">Münazara Stiliniz</h3>
+                                <p class="text-sm leading-relaxed">${profile.munazaraStili || 'Analiz ediliyor...'}</p>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="p-4 card-bg rounded-lg">
-                                    <h3 data-lang-key="strength" class="font-semibold text-green-500 mb-2">Güçlü Yönünüz</h3>
-                                    <p class="text-sm">${profile.gucluYon || 'Analiz ediliyor...'}</p>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200 dark:border-green-800">
+                                    <h3 data-lang-key="strength" class="font-bold text-green-700 dark:text-green-400 mb-3 text-lg">Güçlü Yönünüz</h3>
+                                    <p class="text-sm leading-relaxed">${profile.gucluYon || 'Analiz ediliyor...'}</p>
                                 </div>
-                                <div class="p-4 card-bg rounded-lg">
-                                    <h3 data-lang-key="weakness" class="font-semibold text-red-500 mb-2">Geliştirilecek Yönünüz</h3>
-                                    <p class="text-sm">${profile.gelistirilecekYon || 'Analiz ediliyor...'}</p>
+                                <div class="p-6 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-2xl border border-red-200 dark:border-red-800">
+                                    <h3 data-lang-key="weakness" class="font-bold text-red-700 dark:text-red-400 mb-3 text-lg">Geliştirilecek Yönünüz</h3>
+                                    <p class="text-sm leading-relaxed">${profile.gelistirilecekYon || 'Analiz ediliyor...'}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-4">
-                            <button data-action="show-history" class="w-full p-3 bg-cyan-600 text-white font-bold rounded-lg">Geri Dön</button>
+                        <div class="mt-6">
+                            <button data-action="show-history" class="btn-primary w-full p-4 text-white font-bold rounded-xl transition-all">Geri Dön</button>
                         </div>
                     </div>
                 `;
@@ -664,10 +814,33 @@
                             label: 'İkna Puanı',
                             data: state.history.map(d => d.report.iknaEdicilikPuani),
                             borderColor: '#06b6d4',
-                            tension: 0.1
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            tension: 0.4,
+                            fill: true
                         }]
                     },
-                    options: { scales: { y: { beginAtZero: true, max: 10 } } }
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: 'rgba(156, 163, 175, 0.2)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(156, 163, 175, 0.2)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
                 });
             }
 
@@ -685,67 +858,22 @@
                     setLanguage(state.lang === 'tr' ? 'en' : 'tr');
                 }
 
-                if (action === 'toggle-mic') {
-                    toggleRecording();
-                }
-
-                if (action === 'generate-and-play-audio') {
-                    const messageIndex = parseInt(target.dataset.messageIndex);
-                    const message = state.messages[messageIndex];
-                    const speakerIcon = target.querySelector('.speaker-icon');
-                    const spinner = target.querySelector('.spinner');
-
-                    if (state.currentAudio) {
-                        state.currentAudio.pause();
-                        if (state.currentAudio.messageIndex === messageIndex) {
-                            state.currentAudio = null;
-                            return;
-                        }
-                    }
-
-                    if (message.audio) {
-                        playPcmAudio(message.audio.audioData, message.audio.mimeType, messageIndex);
-                    } else {
-                        speakerIcon.classList.add('hidden');
-                        spinner.classList.remove('hidden');
-                        target.disabled = true;
-
-                        try {
-                            const response = await fetch('/api/tts', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ text: message.text })
-                            });
-                            if (!response.ok) throw new Error('TTS request failed');
-                            const data = await response.json();
-                            message.audio = data;
-                            playPcmAudio(data.audioData, data.mimeType, messageIndex);
-                        } catch (error) {
-                            console.error("Error fetching TTS data:", error);
-                        } finally {
-                            speakerIcon.classList.remove('hidden');
-                            spinner.classList.add('hidden');
-                            target.disabled = false;
-                        }
-                    }
-                }
-
                 if (action === 'set-stance') {
                     state.stance = target.dataset.stance;
 
                     document.querySelectorAll('[data-action="set-stance"]').forEach(btn => {
-                        btn.classList.remove('bg-green-500', 'dark:bg-green-600', 'ring-2', 'ring-green-400', 'text-white');
-                        btn.classList.remove('bg-red-500', 'dark:bg-red-600', 'ring-red-400');
-                        btn.classList.add('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
+                        btn.classList.remove('bg-green-500', 'dark:bg-green-600', 'border-green-400', 'text-white', 'shadow-lg');
+                        btn.classList.remove('bg-red-500', 'dark:bg-red-600', 'border-red-400');
+                        btn.classList.add('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600', 'border-transparent');
                     });
 
-                    target.classList.remove('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
+                    target.classList.remove('card-bg', 'hover:bg-gray-200', 'dark:hover:bg-gray-600', 'border-transparent');
                     target.classList.add(
                         state.stance === 'savunuyorum' ? 'bg-green-500' : 'bg-red-500',
                         state.stance === 'savunuyorum' ? 'dark:bg-green-600' : 'dark:bg-red-600',
-                        'ring-2',
-                        state.stance === 'savunuyorum' ? 'ring-green-400' : 'ring-red-400',
-                        'text-white'
+                        state.stance === 'savunuyorum' ? 'border-green-400' : 'border-red-400',
+                        'text-white',
+                        'shadow-lg'
                     );
 
                     checkCanStart();
@@ -780,7 +908,6 @@
                             body: JSON.stringify({
                                 topic: state.topic,
                                 stance: state.stance,
-                                personality: state.personality,
                                 messages: state.messages,
                                 lang: state.lang
                             })
@@ -817,8 +944,8 @@
                              const errData = await response.json().catch(() => ({error: translations[state.lang].errorReport}));
                              throw new Error(errData.error || translations[state.lang].errorReport);
                         }
-                        const data = await response.json();
-                        renderReportScreen(data.report, data.schema);
+                        const report = await response.json();
+                        renderReportScreen(report);
                     } catch (error) {
                         alert(error.message);
                     } finally {
@@ -831,368 +958,159 @@
                 }
 
                 if (action === 'back-to-report') {
-                    renderReportScreen(state.currentReport, state.currentSchema);
+                    renderReportScreen(state.currentReport);
                 }
 
                 if (action === 'draw-schema') {
-                    if (state.currentSchema) {
-                        renderSchemaScreen(state.currentSchema);
-                    } else {
-                        alert(translations[state.lang].errorSchema);
+                    setLoading(true);
+                     try {
+                        const response = await fetch('/api/schema', {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({
+                               messages: state.messages,
+                               lang: state.lang
+                           })
+                        });
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({error: translations[state.lang].errorSchema}));
+                            throw new Error(errData.error || translations[state.lang].errorSchema);
+                        }
+                        const schemaData = await response.json();
+                        renderSchemaScreen(schemaData);
+                    } catch (error) {
+                        console.error("Schema error:", error);
+                        alert(error.message);
+                    } finally {
+                        setLoading(false);
                     }
                 }
 
                 if (action === 'download-pdf') {
                     setLoading(true, translations[state.lang].pdfLoading);
-
                     try {
                         if (!state.currentReport) {
-                            alert("PDF oluşturmak için önce bir rapor oluşturulmalıdır.");
-                            return;
+                             alert("PDF oluşturmak için önce bir rapor oluşturulmalıdır.");
+                             setLoading(false);
+                             return;
                         }
 
                         const { jsPDF } = window.jspdf;
                         const pdf = new jsPDF({
-                            orientation: 'p',
+                            orientation: 'portrait',
                             unit: 'mm',
                             format: 'a4',
-                            compress: true
+                            putOnlyUsedFonts: true,
+                            floatPrecision: 16
                         });
 
-                        const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const pdfHeight = pdf.internal.pageSize.getHeight();
-                        const margin = 12; // Minimal margins
-                        const contentWidth = pdfWidth - (margin * 2);
+                        // Set PDF metadata
+                        pdf.setProperties({
+                            title: 'Münazara Raporu',
+                            subject: 'Performans Analizi',
+                            author: 'Münazara Arenası',
+                            creator: 'Münazara Arenası'
+                        });
 
-                        // --- Minimalist container (always light theme) ---
-                        const pdfContainer = document.createElement('div');
-                        pdfContainer.id = 'pdf-styled-container';
-                        pdfContainer.style.cssText = `
-                            position: absolute;
-                            top: -10000px;
-                            left: -10000px;
-                            width: 794px;
-                            background: #ffffff;
-                            font-family: 'Georgia', 'Times New Roman', serif;
-                            color: #000000;
-                            padding: 20px;
-                            box-sizing: border-box;
-                            line-height: 1.5;
-                        `;
-
-                        document.body.appendChild(pdfContainer);
-
-                        // --- Ultra compact header (always light theme) ---
-                        const header = document.createElement('div');
-                        header.style.cssText = `
-                            text-align: left;
-                            margin-bottom: 20px;
-                            padding-bottom: 8px;
-                            border-bottom: 2px solid #000000;
-                        `;
-
-                        header.innerHTML = `
-                            <div style="
-                                font-size: 24px;
-                                font-weight: 400;
-                                color: #000000;
-                                margin-bottom: 3px;
-                                letter-spacing: -1px;
-                            ">Münazara Raporu</div>
-                            <div style="
-                                font-size: 12px;
-                                color: #666666;
-                                font-weight: 300;
-                            ">${new Date().toLocaleDateString('tr-TR', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}</div>
-                        `;
-
-                        pdfContainer.appendChild(header);
-
-                        // --- Clean content styling ---
                         const reportElement = document.getElementById('report-content');
-                        if (reportElement) {
-                            const reportClone = reportElement.cloneNode(true);
-
-                            const styledReport = document.createElement('div');
-                            styledReport.style.cssText = `
-                                background: transparent;
-                                margin: 0;
-                                padding: 0;
-                            `;
-
-                            // Ultra compact heading styles (always light theme)
-                            const headings = reportClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
-                            headings.forEach((heading, index) => {
-                                const level = parseInt(heading.tagName.charAt(1));
-                                heading.style.cssText = `
-                                    color: #000000;
-                                    font-weight: ${level <= 2 ? '700' : '600'};
-                                    margin: ${level === 1 ? '0 0 12px 0' : '18px 0 10px 0'};
-                                    font-size: ${level === 1 ? '22px' : level === 2 ? '18px' : level === 3 ? '16px' : '14px'};
-                                    line-height: 1.0;
-                                    font-family: 'Georgia', 'Times New Roman', serif;
-                                `;
-
-                                if (level <= 2 && index > 0) {
-                                    heading.style.paddingTop = '10px';
-                                    heading.style.borderTop = '1px solid #cccccc';
-                                }
-                            });
-
-                            // Ultra compact paragraph styles (always light theme)
-                            const paragraphs = reportClone.querySelectorAll('p');
-                            paragraphs.forEach(p => {
-                                p.style.cssText = `
-                                    margin: 0 0 8px 0;
-                                    font-size: 13px;
-                                    line-height: 1.3;
-                                    color: #000000;
-                                    font-family: 'Georgia', 'Times New Roman', serif;
-                                    text-align: left;
-                                `;
-                            });
-
-                            // Ultra compact list styles (always light theme)
-                            const lists = reportClone.querySelectorAll('ul, ol');
-                            lists.forEach(list => {
-                                list.style.cssText = `
-                                    margin: 10px 0;
-                                    padding-left: 15px;
-                                    color: #000000;
-                                `;
-
-                                const listItems = list.querySelectorAll('li');
-                                listItems.forEach(li => {
-                                    li.style.cssText = `
-                                        margin-bottom: 4px;
-                                        font-size: 13px;
-                                        line-height: 1.3;
-                                        font-family: 'Georgia', 'Times New Roman', serif;
-                                    `;
-                                });
-                            });
-
-                            // Ultra compact table styles (always light theme)
-                            const tables = reportClone.querySelectorAll('table');
-                            tables.forEach(table => {
-                                table.style.cssText = `
-                                    width: 100%;
-                                    border-collapse: collapse;
-                                    margin: 12px 0;
-                                    font-family: 'Arial', sans-serif;
-                                `;
-
-                                const ths = table.querySelectorAll('th');
-                                ths.forEach(th => {
-                                    th.style.cssText = `
-                                        background: #f0f0f0;
-                                        color: #000000;
-                                        padding: 6px 6px;
-                                        font-weight: 700;
-                                        font-size: 11px;
-                                        text-align: left;
-                                        border: 1px solid #cccccc;
-                                    `;
-                                });
-
-                                const tds = table.querySelectorAll('td');
-                                tds.forEach(td => {
-                                    td.style.cssText = `
-                                        padding: 6px;
-                                        border: 1px solid #cccccc;
-                                        font-size: 11px;
-                                        color: #000000;
-                                    `;
-                                });
-                            });
-
-                            // Ultra compact image styles
-                            const images = reportClone.querySelectorAll('img');
-                            images.forEach(img => {
-                                img.style.cssText = `
-                                    max-width: 100%;
-                                    height: auto;
-                                    margin: 8px 0;
-                                    display: block;
-                                `;
-                            });
-
-                            // Ultra compact blockquote styles (always light theme)
-                            const blockquotes = reportClone.querySelectorAll('blockquote');
-                            blockquotes.forEach(quote => {
-                                quote.style.cssText = `
-                                    border-left: 4px solid #000000;
-                                    padding: 10px 0 10px 15px;
-                                    margin: 10px 0;
-                                    font-style: italic;
-                                    color: #333333;
-                                    font-size: 13px;
-                                    font-family: 'Georgia', 'Times New Roman', serif;
-                                `;
-                            });
-
-                            // Ultra compact code blocks (always light theme)
-                            const codeBlocks = reportClone.querySelectorAll('pre, code');
-                            codeBlocks.forEach(code => {
-                                code.style.cssText = `
-                                    background: #f5f5f5;
-                                    color: #000000;
-                                    padding: 8px;
-                                    font-family: 'Courier New', monospace;
-                                    font-size: 11px;
-                                    line-height: 1.2;
-                                    border: 1px solid #dddddd;
-                                    margin: 10px 0;
-                                    display: block;
-                                `;
-                            });
-
-                            styledReport.appendChild(reportClone);
-                            pdfContainer.appendChild(styledReport);
+                        if (!reportElement) {
+                            throw new Error("Rapor içeriği bulunamadı");
                         }
 
-                        // Wait for images to load
-                        const allImages = pdfContainer.querySelectorAll('img');
-                        await Promise.all(Array.from(allImages).map(img => {
-                            return new Promise(resolve => {
-                                if (img.complete) resolve();
-                                else {
-                                    img.onload = resolve;
-                                    img.onerror = resolve;
-                                }
-                            });
-                        }));
+                        // Create a temporary container with white background for PDF
+                        const tempContainer = document.createElement('div');
+                        tempContainer.style.cssText = `
+                            position: absolute;
+                            top: -9999px;
+                            left: -9999px;
+                            width: 800px;
+                            background: white;
+                            padding: 40px;
+                            font-family: Arial, sans-serif;
+                            color: #333;
+                        `;
 
-                        // Capture content (always white background)
-                        const canvas = await html2canvas(pdfContainer, {
+                        // Clone and clean the report content
+                        const reportClone = reportElement.cloneNode(true);
+
+                        // Remove any dark mode classes and ensure white background
+                        reportClone.querySelectorAll('*').forEach(el => {
+                            el.classList.remove('dark:bg-gray-700', 'dark:text-white', 'dark:text-gray-300', 'dark:border-gray-800');
+                            if (el.style) {
+                                el.style.backgroundColor = '';
+                                el.style.color = '#333';
+                            }
+                        });
+
+                        tempContainer.appendChild(reportClone);
+                        document.body.appendChild(tempContainer);
+
+                        const reportCanvas = await html2canvas(tempContainer, {
                             scale: 2,
                             useCORS: true,
-                            allowTaint: true,
                             backgroundColor: '#ffffff',
-                            width: 794,
-                            height: pdfContainer.scrollHeight
+                            logging: false,
+                            allowTaint: false,
+                            foreignObjectRendering: false
                         });
 
-                        // Add to PDF with pagination
-                        const imgData = canvas.toDataURL('image/png', 0.95);
-                        const imgWidth = contentWidth;
-                        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+                        document.body.removeChild(tempContainer);
 
-                        let heightLeft = imgHeight;
-                        let position = 0;
-                        let pageCount = 0;
+                        const reportImgData = reportCanvas.toDataURL('image/jpeg', 0.95);
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
 
-                        while (heightLeft > 0) {
-                            if (pageCount > 0) pdf.addPage();
+                        // Add report to PDF
+                        pdf.addImage(reportImgData, 'JPEG', 0, 0, pdfWidth, Math.min(pdfHeight, pdf.internal.pageSize.getHeight()));
 
-                            const pageHeight = Math.min(heightLeft, pdfHeight - (margin * 2));
-
-                            const pageCanvas = document.createElement('canvas');
-                            pageCanvas.width = canvas.width;
-                            pageCanvas.height = (pageHeight / imgHeight) * canvas.height;
-
-                            const ctx = pageCanvas.getContext('2d');
-                            ctx.drawImage(
-                                canvas,
-                                0, (position / imgHeight) * canvas.height,
-                                canvas.width, pageCanvas.height,
-                                0, 0,
-                                canvas.width, pageCanvas.height
-                            );
-
-                            const pageImgData = pageCanvas.toDataURL('image/png', 0.95);
-                            pdf.addImage(pageImgData, 'PNG', margin, margin, imgWidth, pageHeight);
-
-                            heightLeft -= (pdfHeight - margin * 2);
-                            position += (pdfHeight - margin * 2);
-                            pageCount++;
-                        }
-
-                        // Add schema page if exists
-                        if (state.currentSchema && state.currentSchema.schema && state.currentSchema.schema.trim()) {
+                        // Add schema if available
+                        if (state.currentSchema && state.currentSchema.schema) {
                             pdf.addPage();
 
                             const schemaContainer = document.createElement('div');
                             schemaContainer.style.cssText = `
                                 position: absolute;
-                                top: -10000px;
-                                left: -10000px;
-                                width: 794px;
-                                background: #ffffff;
+                                top: -9999px;
+                                left: -9999px;
+                                width: 800px;
+                                background: white;
                                 padding: 20px;
-                                box-sizing: border-box;
                             `;
-
-                            // Simple schema header (always light theme)
-                            const schemaHeader = document.createElement('div');
-                            schemaHeader.innerHTML = `
-                                <div style="
-                                    font-size: 26px;
-                                    font-weight: 400;
-                                    color: #000000;
-                                    margin-bottom: 25px;
-                                    text-align: center;
-                                    font-family: 'Georgia', 'Times New Roman', serif;
-                                    border-bottom: 2px solid #000000;
-                                    padding-bottom: 10px;
-                                ">Sistem Şeması</div>
-                            `;
-                            schemaContainer.appendChild(schemaHeader);
-
                             document.body.appendChild(schemaContainer);
 
                             try {
-                                const { svg } = await mermaid.render('pdf-mermaid-' + Date.now(), state.currentSchema.schema);
-
-                                const schemaWrapper = document.createElement('div');
-                                schemaWrapper.style.cssText = `
-                                    text-align: center;
-                                    padding: 20px 0;
-                                `;
-
-                                schemaWrapper.innerHTML = svg;
-
-                                const svgElement = schemaWrapper.querySelector('svg');
-                                if (svgElement) {
-                                    svgElement.style.maxWidth = '100%';
-                                    svgElement.style.height = 'auto';
-                                }
-
-                                schemaContainer.appendChild(schemaWrapper);
+                                const svgText = await mermaid.render('pdf-mermaid-' + Date.now(), state.currentSchema.schema);
+                                schemaContainer.innerHTML = svgText;
 
                                 const schemaCanvas = await html2canvas(schemaContainer, {
                                     scale: 2,
                                     useCORS: true,
-                                    allowTaint: true,
-                                    backgroundColor: '#ffffff'
+                                    backgroundColor: '#ffffff',
+                                    logging: false
                                 });
 
-                                const schemaImgData = schemaCanvas.toDataURL('image/png', 0.95);
-                                const schemaImgWidth = contentWidth;
-                                const schemaImgHeight = (schemaCanvas.height * contentWidth) / schemaCanvas.width;
+                                const schemaImgData = schemaCanvas.toDataURL('image/jpeg', 0.95);
+                                const schemaPdfHeight = (schemaCanvas.height * pdfWidth) / schemaCanvas.width;
+                                pdf.addImage(schemaImgData, 'JPEG', 0, 0, pdfWidth, Math.min(schemaPdfHeight, pdf.internal.pageSize.getHeight()));
 
-                                pdf.addImage(schemaImgData, 'PNG', margin, margin, schemaImgWidth, Math.min(schemaImgHeight, pdfHeight - margin * 2));
-
-                            } catch (error) {
-                                console.warn('Schema render error:', error);
+                            } catch (schemaError) {
+                                console.error("Schema PDF error:", schemaError);
+                                // Add text fallback if schema fails
+                                pdf.setFontSize(16);
+                                pdf.text('Argüman Haritası', 20, 30);
+                                pdf.setFontSize(12);
+                                pdf.text('Argüman haritası oluşturulurken bir hata oluştu.', 20, 50);
                             }
 
                             document.body.removeChild(schemaContainer);
                         }
 
-                        // Clean up
-                        document.body.removeChild(pdfContainer);
-
-                        // Save PDF
-                        const timestamp = new Date().toISOString().slice(0, 10);
-                        pdf.save(`Munazara-Raporu-${timestamp}.pdf`);
+                        // Save the PDF
+                        const filename = `munazara-raporu-${new Date().toISOString().split('T')[0]}.pdf`;
+                        pdf.save(filename);
 
                     } catch (error) {
-                        console.error("PDF Generation Error:", error);
+                        console.error("PDF Oluşturma Hatası:", error);
                         alert(`${translations[state.lang].errorPDF}: ${error.message}`);
                     } finally {
                         setLoading(false);
@@ -1281,7 +1199,8 @@
                     const debateId = parseInt(target.dataset.id);
                     const debate = state.history.find(d => d.id === debateId);
                     if (debate) {
-                        renderReportScreen(debate.report, debate.schema);
+                        renderReportScreen(debate.report);
+                        state.currentSchema = debate.schema;
                     }
                 }
 
@@ -1302,120 +1221,26 @@
                 }
             }
 
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            let recognition;
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.lang = state.lang;
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                recognition.onresult = (event) => {
-                    const text = event.results[event.results.length - 1][0].transcript.trim();
-                    document.getElementById('message-input').value = text;
-                    document.getElementById('send-btn').click();
-                };
-
-                recognition.onspeechend = () => {
-                    toggleRecording(false);
-                };
-
-                recognition.onerror = (event) => {
-                    console.error("Speech recognition error", event.error);
-                    toggleRecording(false);
-                };
-            }
-
-            function toggleRecording(force) {
-                const micBtn = document.getElementById('mic-btn');
-                if (!micBtn) return;
-
-                state.isRecording = force !== undefined ? force : !state.isRecording;
-
-                if (state.isRecording) {
-                    recognition.lang = state.lang;
-                    recognition.start();
-                    micBtn.classList.add('bg-red-600', 'mic-recording');
-                    micBtn.classList.remove('bg-gray-500');
-                } else {
-                    recognition.stop();
-                    micBtn.classList.remove('bg-red-600', 'mic-recording');
-                    micBtn.classList.add('bg-gray-500');
-                }
-            }
-
-            function base64ToArrayBuffer(base64) {
-                const binaryString = window.atob(base64);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                return bytes.buffer;
-            }
-
-            function pcmToWav(pcmData, sampleRate) {
-                const header = new ArrayBuffer(44);
-                const view = new DataView(header);
-                const numChannels = 1;
-                const bitsPerSample = 16;
-                const blockAlign = numChannels * bitsPerSample / 8;
-                const byteRate = sampleRate * blockAlign;
-                const dataSize = pcmData.length * pcmData.BYTES_PER_ELEMENT;
-
-                view.setUint32(0, 0x52494646, false); // "RIFF"
-                view.setUint32(4, 36 + dataSize, true); // file size
-                view.setUint32(8, 0x57415645, false); // "WAVE"
-                view.setUint32(12, 0x666d7420, false); // "fmt "
-                view.setUint32(16, 16, true); // PCM header size
-                view.setUint16(20, 1, true); // PCM format
-                view.setUint16(22, numChannels, true);
-                view.setUint32(24, sampleRate, true);
-                view.setUint32(28, byteRate, true);
-                view.setUint16(32, blockAlign, true);
-                view.setUint16(34, bitsPerSample, true);
-                view.setUint32(36, 0x64617461, false); // "data"
-                view.setUint32(40, dataSize, true); // data size
-
-                const wavBlob = new Blob([view, pcmData], { type: 'audio/wav' });
-                return wavBlob;
-            }
-
-            function playPcmAudio(audioData, mimeType, messageIndex) {
-                try {
-                    if (state.currentAudio) {
-                        state.currentAudio.pause();
-                    }
-
-                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                    if (!sampleRateMatch) {
-                        console.error('Sample rate not found in mimeType:', mimeType);
-                        return;
-                    }
-                    const sampleRate = parseInt(sampleRateMatch[1], 10);
-                    const pcmBuffer = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmBuffer);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-
-                    state.currentAudio = new Audio(audioUrl);
-                    state.currentAudio.messageIndex = messageIndex;
-                    state.currentAudio.play();
-
-                } catch (error) {
-                    console.error("Error playing PCM audio:", error);
-                }
-            }
-
             async function initApp() {
                 const savedLang = localStorage.getItem('lang') || 'tr';
                 const savedTheme = localStorage.getItem('theme') || 'light';
 
-                setTheme(savedTheme);
                 setLanguage(savedLang);
+                setTheme(savedTheme);
+
+                // Initialize speech recognition
+                initSpeechRecognition();
+
+                if (typeof mermaid !== 'undefined') {
+                    mermaid.initialize({ startOnLoad: false, theme: savedTheme });
+                }
 
                 document.body.addEventListener('click', handleAction);
+
+                // Theme toggle event
+                document.getElementById('theme-toggle').addEventListener('click', () => {
+                    setTheme(state.theme === 'dark' ? 'light' : 'dark');
+                });
 
                 try {
                     const response = await fetch('/api/status');
