@@ -30,25 +30,7 @@ ENV PYTHONUNBUFFERED=1
 # Port ayarla
 EXPOSE 5001
 
-# Veritabanını hazırla (güvenli şekilde)
-RUN python -c "
-import os
-import sys
-sys.path.append('/app')
-try:
-    from app import app, db
-    with app.app_context():
-        if not os.path.exists('/app/debate_arena.db'):
-            db.create_all()
-            print('✅ Database created successfully!')
-        else:
-            print('ℹ️  Database already exists.')
-except Exception as e:
-    print(f'⚠️  Database initialization error: {e}')
-    # Continue anyway, app will handle it
-"
-
-# Health check ekle (internal container address kullan)
+# Health check ekle
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://127.0.0.1:5001/ || exit 1
 
@@ -56,5 +38,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Uygulamayı çalıştır
+# Uygulamayı çalıştır (database init app.py içinde zaten var)
 CMD ["python", "app.py"]
