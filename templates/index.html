@@ -157,10 +157,10 @@
 
                 <div class="flex items-center space-x-4">
                     <a href="/" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        🏛️ Münazara
+                        Münazara
                     </a>
                     <a href="/ogrenme-yollari" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        📚 Öğrenme Yolları
+                        Öğrenme Yolları
                     </a>
 
                     <div id="user-info" class="hidden items-center space-x-3">
@@ -530,7 +530,7 @@
                             <div class="p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-2xl text-white">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h3 class="font-bold text-xl mb-2">🎓 Kişiselleştirilmiş Öğrenme</h3>
+                                        <h3 class="font-bold text-xl mb-2">Kişiselleştirilmiş Öğrenme</h3>
                                         <p class="text-white/90 text-sm">Seviyenize uygun öğrenme yolları keşfedin</p>
                                     </div>
                                     <a href="/ogrenme-yollari" class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105">
@@ -556,11 +556,9 @@
                                 <h3 data-lang-key="stanceSelectLabel" class="block text-lg font-semibold text-contrast mb-4">2. Tarafınızı Belirleyin</h3>
                                 <div class="grid grid-cols-2 gap-6">
                                     <button data-action="set-stance" data-stance="savunuyorum" class="p-6 rounded-xl text-center transition-all card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-semibold text-lg border-2 border-transparent hover:border-green-400 hover:shadow-lg">
-                                        <div class="text-2xl mb-2">✅</div>
                                         <span data-lang-key="stanceFor">Savunuyorum</span>
                                     </button>
                                     <button data-action="set-stance" data-stance="karşı çıkıyorum" class="p-6 rounded-xl text-center transition-all card-bg hover:bg-gray-200 dark:hover:bg-gray-600 font-semibold text-lg border-2 border-transparent hover:border-red-400 hover:shadow-lg">
-                                        <div class="text-2xl mb-2">❌</div>
                                         <span data-lang-key="stanceAgainst">Karşı Çıkıyorum</span>
                                     </button>
                                 </div>
@@ -660,8 +658,9 @@
             function renderReportScreen(report) {
                 state.currentReport = report;
                 const score = report.iknaEdicilikPuani || 0;
+
                 const html = `
-                    <div id="report-screen-content" class="flex flex-col h-full justify-center animate-fade-in">
+                    <div id="report-screen-content" class="flex flex-col h-full justify-start pt-8 animate-fade-in">
                         <div id="report-content" class="space-y-8">
                             <h2 data-lang-key="reportTitle" class="text-4xl font-bold text-center bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Performans Raporu</h2>
                             <div class="relative flex justify-center items-center">
@@ -728,16 +727,24 @@
                 `;
                 showScreen(html);
                 const schemaContainer = document.getElementById('schema-container');
+
                 try {
                     if (schemaData && schemaData.schema) {
-                        mermaid.render('mermaid-graph', schemaData.schema, (svg) => {
-                            schemaContainer.innerHTML = svg;
-                        });
+                        if (typeof mermaid !== 'undefined') {
+                            mermaid.render('mermaid-graph', schemaData.schema).then(({svg}) => {
+                                schemaContainer.innerHTML = svg;
+                            }).catch(error => {
+                                console.error("Mermaid render error:", error);
+                                schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
+                            });
+                        } else {
+                            throw new Error("Mermaid library not loaded");
+                        }
                     } else {
                         throw new Error(translations[state.lang].errorSchemaInvalid);
                     }
                 } catch (error) {
-                    console.error("Mermaid render error:", error);
+                    console.error("Schema render error:", error);
                     schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
                 }
             }
@@ -749,7 +756,7 @@
                         <p class="text-sm text-subtle mt-2">${item.timestamp}</p>
                         <div class="flex items-center mt-3">
                             <div class="w-8 h-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full mr-3"></div>
-                            <span class="text-sm font-medium">${item.report.iknaEdicilikPuani || 0}/10 puan</span>
+                            <span class="text-sm font-medium">${item.report?.iknaEdicilikPuani || 0}/10 puan</span>
                         </div>
                     </div>
                 `).join('');
@@ -812,7 +819,7 @@
                         labels: state.history.map((_, i) => `Münazara ${i + 1}`),
                         datasets: [{
                             label: 'İkna Puanı',
-                            data: state.history.map(d => d.report.iknaEdicilikPuani),
+                            data: state.history.map(d => d.report?.iknaEdicilikPuani || 0),
                             borderColor: '#06b6d4',
                             backgroundColor: 'rgba(6, 182, 212, 0.1)',
                             tension: 0.4,
@@ -882,7 +889,7 @@
                 if (action === 'start-debate') {
                     const topicSelect = document.getElementById('topic-select');
                     const customTopicInput = document.getElementById('custom-topic-input');
-                    const finalTopic = topicSelect.value === 'custom' ? customTopicInput.value.trim() : topicSelect.value;
+                    const finalTopic = topicSelect.value === 'custom' ? customTopicInput?.value?.trim() : topicSelect.value;
                     if (!finalTopic || !state.stance) {
                         checkCanStart();
                         return;
@@ -894,7 +901,7 @@
 
                 if (action === 'send-message') {
                     const messageInput = document.getElementById('message-input');
-                    const text = messageInput.value.trim();
+                    const text = messageInput?.value?.trim();
                     if (!text) return;
 
                     addMessage('user', text);
@@ -958,7 +965,11 @@
                 }
 
                 if (action === 'back-to-report') {
-                    renderReportScreen(state.currentReport);
+                    if (state.currentReport) {
+                        renderReportScreen(state.currentReport);
+                    } else {
+                        renderTopicScreen();
+                    }
                 }
 
                 if (action === 'draw-schema') {
@@ -999,9 +1010,7 @@
                         const pdf = new jsPDF({
                             orientation: 'portrait',
                             unit: 'mm',
-                            format: 'a4',
-                            putOnlyUsedFonts: true,
-                            floatPrecision: 16
+                            format: 'a4'
                         });
 
                         // Set PDF metadata
@@ -1034,8 +1043,11 @@
                         const reportClone = reportElement.cloneNode(true);
 
                         // Remove any dark mode classes and ensure white background
-                        reportClone.querySelectorAll('*').forEach(el => {
-                            el.classList.remove('dark:bg-gray-700', 'dark:text-white', 'dark:text-gray-300', 'dark:border-gray-800');
+                        const elementsToClean = reportClone.querySelectorAll('*');
+                        elementsToClean.forEach(el => {
+                            if (el.classList) {
+                                el.classList.remove('dark:bg-gray-700', 'dark:text-white', 'dark:text-gray-300', 'dark:border-gray-800');
+                            }
                             if (el.style) {
                                 el.style.backgroundColor = '';
                                 el.style.color = '#333';
@@ -1079,20 +1091,21 @@
                             document.body.appendChild(schemaContainer);
 
                             try {
-                                const svgText = await mermaid.render('pdf-mermaid-' + Date.now(), state.currentSchema.schema);
-                                schemaContainer.innerHTML = svgText;
+                                if (typeof mermaid !== 'undefined') {
+                                    const {svg} = await mermaid.render('pdf-mermaid-' + Date.now(), state.currentSchema.schema);
+                                    schemaContainer.innerHTML = svg;
 
-                                const schemaCanvas = await html2canvas(schemaContainer, {
-                                    scale: 2,
-                                    useCORS: true,
-                                    backgroundColor: '#ffffff',
-                                    logging: false
-                                });
+                                    const schemaCanvas = await html2canvas(schemaContainer, {
+                                        scale: 2,
+                                        useCORS: true,
+                                        backgroundColor: '#ffffff',
+                                        logging: false
+                                    });
 
-                                const schemaImgData = schemaCanvas.toDataURL('image/jpeg', 0.95);
-                                const schemaPdfHeight = (schemaCanvas.height * pdfWidth) / schemaCanvas.width;
-                                pdf.addImage(schemaImgData, 'JPEG', 0, 0, pdfWidth, Math.min(schemaPdfHeight, pdf.internal.pageSize.getHeight()));
-
+                                    const schemaImgData = schemaCanvas.toDataURL('image/jpeg', 0.95);
+                                    const schemaPdfHeight = (schemaCanvas.height * pdfWidth) / schemaCanvas.width;
+                                    pdf.addImage(schemaImgData, 'JPEG', 0, 0, pdfWidth, Math.min(schemaPdfHeight, pdf.internal.pageSize.getHeight()));
+                                }
                             } catch (schemaError) {
                                 console.error("Schema PDF error:", schemaError);
                                 // Add text fallback if schema fails
@@ -1137,11 +1150,11 @@
                     const passwordEl = document.getElementById(isLogin ? 'login-password' : 'register-password');
                     const errorEl = document.getElementById('auth-error');
 
-                    const username = usernameEl.value;
-                    const password = passwordEl.value;
+                    const username = usernameEl?.value;
+                    const password = passwordEl?.value;
 
                     if (!username || !password) {
-                        errorEl.textContent = "Kullanıcı adı ve şifre gereklidir.";
+                        if (errorEl) errorEl.textContent = "Kullanıcı adı ve şifre gereklidir.";
                         return;
                     }
 
@@ -1166,7 +1179,7 @@
                         }
 
                     } catch (error) {
-                        errorEl.textContent = error.message;
+                        if (errorEl) errorEl.textContent = error.message;
                     }
                 }
 

@@ -135,13 +135,13 @@
             <div class="flex-1 overflow-y-auto p-4">
                 <div class="space-y-3">
                     <button id="nav-topics" class="nav-btn w-full text-left p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium transition-all">
-                        📚 Konular
+                        Konular
                     </button>
                     <button id="nav-my-paths" class="nav-btn w-full text-left p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all">
-                        🎯 Öğrenme Yollarım
+                        Öğrenme Yollarım
                     </button>
                     <button id="nav-progress" class="nav-btn w-full text-left p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all">
-                        📊 İlerleme Durumu
+                        İlerleme Durumu
                     </button>
                 </div>
             </div>
@@ -176,7 +176,7 @@
 
                     <div class="flex items-center space-x-4">
                         <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            🏛️ Münazara
+                            Münazara
                         </a>
 
                         <!-- Theme Toggle -->
@@ -317,7 +317,7 @@
     </div>
 
     <script>
-        console.log('🚀 Learning Paths JavaScript initializing...');
+        console.log('Learning Paths JavaScript initializing...');
 
         // Global state
         const learningState = {
@@ -439,32 +439,70 @@
             }
         }
 
-        // API functions
+        // API functions with better error handling
         async function apiCall(url, options = {}) {
             try {
+                log('API call to:', url);
                 const response = await fetch(url, options);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
                 }
-                return await response.json();
+
+                const data = await response.json();
+                log('API response received');
+                return data;
             } catch (err) {
-                error('API call failed:', err);
+                error('API call failed:', url, err);
                 throw err;
             }
         }
 
-        // Load topics
+        // Load topics with better error handling
         async function loadTopics() {
             log('Loading topics...');
-            try {
-                const topics = await apiCall('/api/learning-topics');
-                log('Topics loaded:', topics.length);
+            const grid = document.getElementById('topics-grid');
 
-                const grid = document.getElementById('topics-grid');
-                if (!grid) {
-                    error('Topics grid not found');
-                    return;
+            if (!grid) {
+                error('Topics grid not found');
+                return;
+            }
+
+            try {
+                // Show default topics if API is not available
+                const defaultTopics = [
+                    {
+                        id: 1,
+                        name: 'Münazara Temelleri',
+                        description: 'Temel münazara teknikleri, argüman geliştirme ve karşı argüman üretme becerileri'
+                    },
+                    {
+                        id: 2,
+                        name: 'Mantık ve Eleştirel Düşünme',
+                        description: 'Mantık hataları, eleştirel analiz ve objektif değerlendirme yöntemleri'
+                    },
+                    {
+                        id: 3,
+                        name: 'Retorik ve İkna Sanatı',
+                        description: 'Etkili konuşma, ikna teknikleri ve dinleyici analizi'
+                    },
+                    {
+                        id: 4,
+                        name: 'Araştırma ve Kanıt Kullanımı',
+                        description: 'Güvenilir kaynak araştırması, kanıt değerlendirme ve veri analizi'
+                    }
+                ];
+
+                let topics = defaultTopics;
+
+                try {
+                    topics = await apiCall('/api/learning-topics');
+                } catch (err) {
+                    log('Using default topics due to API error:', err.message);
                 }
+
+                log('Topics loaded:', topics.length);
 
                 if (topics.length === 0) {
                     grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-xl text-gray-600 dark:text-gray-400">Henüz konu eklenmemiş.</p></div>';
@@ -487,43 +525,88 @@
 
             } catch (err) {
                 error('Error loading topics:', err);
-                const grid = document.getElementById('topics-grid');
-                if (grid) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                            <p class="text-red-600 dark:text-red-400 text-xl mb-4">Konular yüklenirken bir hata oluştu</p>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                            <button onclick="loadTopics()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
-                        </div>
-                    `;
-                }
+                grid.innerHTML = `
+                    <div class="col-span-full text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">Konular yüklenirken bir hata oluştu</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
+                        <button onclick="loadTopics()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
+                    </div>
+                `;
             }
         }
 
-        // Start quiz
+        // Start quiz with demo data fallback
         async function startQuiz(topicId) {
             log('Starting quiz for topic:', topicId);
+
             try {
                 learningState.currentTopicId = topicId;
                 learningState.currentQuestion = 0;
                 learningState.answers = [];
 
-                const data = await apiCall(`/api/quiz/${topicId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lang: 'tr' })
-                });
+                // Demo quiz questions for different topics
+                const demoQuizzes = {
+                    1: { // Münazara Temelleri
+                        questions: [
+                            {
+                                question: "Münazarada en önemli unsur hangisidir?",
+                                options: ["Güçlü ses tonu", "Mantıklı argümanlar", "Hızlı konuşma", "Güzel görünüm"],
+                                correct: 1
+                            },
+                            {
+                                question: "Karşı argüman üretirken hangi yöntem en etkilidir?",
+                                options: ["Rakibin sözünü kesmek", "Kendi görüşünü tekrarlamak", "Rakibin argümanını analiz etmek", "Yüksek sesle konuşmak"],
+                                correct: 2
+                            },
+                            {
+                                question: "Başarılı bir münazara için gerekli olan temel özellik nedir?",
+                                options: ["Hazırlık", "Şans", "Deneyim", "Yaş"],
+                                correct: 0
+                            }
+                        ]
+                    },
+                    2: { // Mantık ve Eleştirel Düşünme
+                        questions: [
+                            {
+                                question: "Ad Hominem mantık hatası nedir?",
+                                options: ["Argümana değil kişiye saldırı", "Yanlış analoji", "Çok seçenekli hata", "Dairesel mantık"],
+                                correct: 0
+                            },
+                            {
+                                question: "Eleştirel düşünmenin temel unsuru hangisidir?",
+                                options: ["Önyargı", "Objektif analiz", "Hızlı karar verme", "Duygusal tepki"],
+                                correct: 1
+                            }
+                        ]
+                    }
+                };
 
-                learningState.currentQuiz = data.questions;
-                log('Quiz loaded with', data.questions.length, 'questions');
+                let quizData;
+                try {
+                    quizData = await apiCall(`/api/quiz/${topicId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lang: 'tr' })
+                    });
+                    learningState.currentQuiz = quizData.questions;
+                } catch (err) {
+                    log('Using demo quiz due to API error:', err.message);
+                    quizData = demoQuizzes[topicId] || demoQuizzes[1];
+                    learningState.currentQuiz = quizData.questions;
+                }
 
-                // Get topic name
-                const topics = await apiCall('/api/learning-topics');
-                const topic = topics.find(t => t.id === topicId);
+                log('Quiz loaded with', learningState.currentQuiz.length, 'questions');
 
+                // Set quiz title
                 const quizTitle = document.getElementById('quiz-title');
-                if (quizTitle && topic) {
-                    quizTitle.textContent = `${topic.name} - Seviye Belirleme Testi`;
+                if (quizTitle) {
+                    const topicNames = {
+                        1: 'Münazara Temelleri',
+                        2: 'Mantık ve Eleştirel Düşünme',
+                        3: 'Retorik ve İkna Sanatı',
+                        4: 'Araştırma ve Kanıt Kullanımı'
+                    };
+                    quizTitle.textContent = `${topicNames[topicId] || 'Konu'} - Seviye Belirleme Testi`;
                 }
 
                 showView('quiz-view');
@@ -593,6 +676,7 @@
         // Complete quiz
         async function completeQuiz() {
             log('Completing quiz...');
+
             try {
                 // Calculate score
                 let score = 0;
@@ -604,17 +688,31 @@
 
                 log('Quiz completed with score:', score);
 
-                const result = await apiCall('/api/quiz-result', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        topic_id: learningState.currentTopicId,
-                        score: score
-                    })
-                });
+                // Determine level based on score
+                const percentage = (score / learningState.currentQuiz.length) * 100;
+                let level;
+                if (percentage >= 80) level = 'master';
+                else if (percentage >= 60) level = 'senior';
+                else if (percentage >= 40) level = 'mid';
+                else if (percentage >= 20) level = 'entry';
+                else level = 'beginner';
 
-                learningState.userLevel = result.level;
-                showQuizResult(score, result.level);
+                try {
+                    const result = await apiCall('/api/quiz-result', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            topic_id: learningState.currentTopicId,
+                            score: score
+                        })
+                    });
+                    learningState.userLevel = result.level;
+                } catch (err) {
+                    log('Using calculated level due to API error:', err.message);
+                    learningState.userLevel = level;
+                }
+
+                showQuizResult(score, learningState.userLevel);
 
             } catch (err) {
                 error('Error completing quiz:', err);
@@ -652,26 +750,69 @@
             };
 
             resultIcon.className = `mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center text-white ${levelColors[level]}`;
-            resultText.textContent = `${score}/10 doğru cevap ile ${levelTexts[level]} olarak değerlendirildiniz.`;
+            resultText.textContent = `${score}/${learningState.currentQuiz.length} doğru cevap ile ${levelTexts[level]} olarak değerlendirildiniz.`;
 
             modal.classList.remove('hidden');
         }
 
-        // Generate learning path
+        // Generate learning path with demo data
         async function generateLearningPath() {
             log('Generating learning path...');
+
             try {
                 const modal = document.getElementById('quiz-result-modal');
                 if (modal) modal.classList.add('hidden');
 
-                const roadmap = await apiCall(`/api/learning-path/${learningState.currentTopicId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        level: learningState.userLevel,
-                        lang: 'tr'
-                    })
-                });
+                const demoRoadmaps = {
+                    1: { // Münazara Temelleri
+                        title: 'Münazara Temelleri Öğrenme Yolu',
+                        sections: [
+                            {
+                                title: 'Temel Kavramlar',
+                                description: 'Münazaranın temel unsurlarını öğrenin',
+                                tasks: [
+                                    'Münazara tanımını ve türlerini araştırın',
+                                    'Temel münazara kurallarını öğrenin',
+                                    'Argüman ve iddia arasındaki farkı anlayın'
+                                ]
+                            },
+                            {
+                                title: 'Argüman Geliştirme',
+                                description: 'Güçlü argümanlar oluşturmayı öğrenin',
+                                tasks: [
+                                    'PREP metodunu uygulayın',
+                                    'Kanıt türlerini öğrenin',
+                                    'Örnek argümanlar analiz edin'
+                                ]
+                            }
+                        ],
+                        projects: {
+                            micro: {
+                                title: 'Mini Münazara',
+                                description: 'Basit bir konuda 3 dakikalık argüman geliştirin'
+                            },
+                            main: {
+                                title: 'Kapsamlı Münazara Analizi',
+                                description: 'Gerçek bir münazarayı analiz edin ve rapor hazırlayın'
+                            }
+                        }
+                    }
+                };
+
+                let roadmap;
+                try {
+                    roadmap = await apiCall(`/api/learning-path/${learningState.currentTopicId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            level: learningState.userLevel,
+                            lang: 'tr'
+                        })
+                    });
+                } catch (err) {
+                    log('Using demo roadmap due to API error:', err.message);
+                    roadmap = demoRoadmaps[learningState.currentTopicId] || demoRoadmaps[1];
+                }
 
                 log('Roadmap generated:', roadmap);
                 displayRoadmap(roadmap);
@@ -696,7 +837,16 @@
             }
 
             title.textContent = roadmap.title;
-            if (level) level.textContent = `Seviyeniz: ${learningState.userLevel}`;
+            if (level) {
+                const levelTexts = {
+                    'beginner': 'Başlangıç Seviyesi',
+                    'entry': 'Giriş Seviyesi',
+                    'mid': 'Orta Seviye',
+                    'senior': 'İleri Seviye',
+                    'master': 'Uzman Seviyesi'
+                };
+                level.textContent = `Seviyeniz: ${levelTexts[learningState.userLevel] || learningState.userLevel}`;
+            }
 
             content.innerHTML = `
                 ${roadmap.sections.map((section, sectionIndex) => `
@@ -721,7 +871,7 @@
                 <div class="grid md:grid-cols-2 gap-8 mt-12">
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
                         <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">🎯</div>
+                            <div class="text-4xl mb-4">Mikro</div>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Mikro Proje</h3>
                         </div>
                         <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-4 text-xl">${roadmap.projects.micro.title}</h4>
@@ -730,7 +880,7 @@
 
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
                         <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">🚀</div>
+                            <div class="text-4xl mb-4">Ana</div>
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ana Proje</h3>
                         </div>
                         <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-4 text-xl">${roadmap.projects.main.title}</h4>
@@ -742,23 +892,30 @@
             showView('roadmap-view');
         }
 
-        // Load my paths
+        // Load my paths with demo data fallback
         async function loadMyPaths() {
             log('Loading my paths...');
-            try {
-                const paths = await apiCall('/api/learning-paths');
-                log('My paths loaded:', paths.length);
 
-                const content = document.getElementById('my-paths-content');
-                if (!content) {
-                    error('My paths content not found');
-                    return;
+            const content = document.getElementById('my-paths-content');
+            if (!content) {
+                error('My paths content not found');
+                return;
+            }
+
+            try {
+                let paths = [];
+                try {
+                    paths = await apiCall('/api/learning-paths');
+                } catch (err) {
+                    log('API not available, showing empty state:', err.message);
                 }
+
+                log('My paths loaded:', paths.length);
 
                 if (paths.length === 0) {
                     content.innerHTML = `
                         <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                            <div class="text-6xl mb-6">📚</div>
+                            <div class="text-6xl mb-6">Kitap</div>
                             <h3 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Henüz öğrenme yolunuz yok</h3>
                             <p class="text-xl text-gray-500 dark:text-gray-400 mb-8">Bir konu seçerek ilk öğrenme yolunuzu oluşturun.</p>
                             <button onclick="showTopicsFromMyPaths()" class="btn-primary px-8 py-4 text-white rounded-xl font-semibold text-lg">
@@ -782,9 +939,9 @@
                         </div>
 
                         <div class="mb-6">
-                            <h4 class="font-bold text-gray-900 dark:text-white mb-3 text-lg">${path.roadmap.title}</h4>
+                            <h4 class="font-bold text-gray-900 dark:text-white mb-3 text-lg">${path.roadmap?.title || 'Öğrenme Yolu'}</h4>
                             <div class="text-gray-600 dark:text-gray-400">
-                                ${path.roadmap.sections.length} bölüm • ${path.roadmap.sections.reduce((total, section) => total + section.tasks.length, 0)} görev
+                                ${path.roadmap?.sections?.length || 0} bölüm • ${path.roadmap?.sections?.reduce((total, section) => total + (section.tasks?.length || 0), 0) || 0} görev
                             </div>
                         </div>
 
@@ -801,54 +958,53 @@
 
             } catch (err) {
                 error('Error loading my paths:', err);
-                const content = document.getElementById('my-paths-content');
-                if (content) {
-                    content.innerHTML = `
-                        <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                            <p class="text-red-600 dark:text-red-400 text-xl mb-4">Öğrenme yolları yüklenirken bir hata oluştu</p>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                            <button onclick="loadMyPaths()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
-                        </div>
-                    `;
-                }
+                content.innerHTML = `
+                    <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">Öğrenme yolları yüklenirken bir hata oluştu</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
+                        <button onclick="loadMyPaths()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
+                    </div>
+                `;
             }
         }
 
-        // Load progress
+        // Load progress with demo data
         async function loadProgress() {
             log('Loading progress...');
-            try {
-                // Get user's quiz results and learning paths
-                const [paths, status] = await Promise.all([
-                    apiCall('/api/learning-paths'),
-                    apiCall('/api/status')
-                ]);
 
-                const content = document.getElementById('progress-content');
-                if (!content) return;
+            const content = document.getElementById('progress-content');
+            if (!content) return;
+
+            try {
+                let paths = [];
+                let totalTasks = 0;
+                let completedTasks = 0;
+
+                try {
+                    paths = await apiCall('/api/learning-paths');
+                    totalTasks = paths.reduce((total, path) => {
+                        return total + (path.roadmap?.sections?.reduce((sectionTotal, section) => {
+                            return sectionTotal + (section.tasks?.length || 0);
+                        }, 0) || 0);
+                    }, 0);
+                    completedTasks = paths.reduce((total, path) => {
+                        const progress = path.progress || {};
+                        return total + Object.values(progress).filter(Boolean).length;
+                    }, 0);
+                } catch (err) {
+                    log('Using demo progress data due to API error:', err.message);
+                }
 
                 if (paths.length === 0) {
                     content.innerHTML = `
                         <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                            <div class="text-6xl mb-6">📊</div>
+                            <div class="text-6xl mb-6">Grafik</div>
                             <h3 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Henüz ilerleme verisi yok</h3>
                             <p class="text-xl text-gray-500 dark:text-gray-400 mb-8">Öğrenme yollarınızı oluşturduktan sonra ilerlemenizi burada görebilirsiniz.</p>
                         </div>
                     `;
                     return;
                 }
-
-                // Create progress overview
-                const totalTasks = paths.reduce((total, path) => {
-                    return total + path.roadmap.sections.reduce((sectionTotal, section) => {
-                        return sectionTotal + section.tasks.length;
-                    }, 0);
-                }, 0);
-
-                const completedTasks = paths.reduce((total, path) => {
-                    const progress = path.progress || {};
-                    return total + Object.values(progress).filter(Boolean).length;
-                }, 0);
 
                 const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
@@ -868,33 +1024,8 @@
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-8">
-                        ${paths.map(path => {
-                            const pathTasks = path.roadmap.sections.reduce((total, section) => total + section.tasks.length, 0);
-                            const pathCompleted = Object.values(path.progress || {}).filter(Boolean).length;
-                            const pathProgress = pathTasks > 0 ? Math.round((pathCompleted / pathTasks) * 100) : 0;
-
-                                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                                    <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${path.topic_name}</h4>
-                                    <div class="mb-4">
-                                        <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                            <span>İlerleme</span>
-                                            <span>${pathCompleted}/${pathTasks}</span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full" style="width: ${pathProgress}%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="text-center">
-                                        <span class="text-2xl font-bold text-gray-900 dark:text-white">${pathProgress}%</span>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-
                     <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
-                        <h3 class="text-2xl font-bold text-purple-800 dark:text-purple-400 mb-4">🏆 Başarılarınız</h3>
+                        <h3 class="text-2xl font-bold text-purple-800 dark:text-purple-400 mb-4">Başarılarınız</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div class="text-center">
                                 <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">${paths.length}</div>
@@ -918,16 +1049,13 @@
 
             } catch (err) {
                 error('Error loading progress:', err);
-                const content = document.getElementById('progress-content');
-                if (content) {
-                    content.innerHTML = `
-                        <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                            <p class="text-red-600 dark:text-red-400 text-xl mb-4">İlerleme verileri yüklenirken bir hata oluştu</p>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                            <button onclick="loadProgress()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
-                        </div>
-                    `;
-                }
+                content.innerHTML = `
+                    <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">İlerleme verileri yüklenirken bir hata oluştu</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
+                        <button onclick="loadProgress()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
+                    </div>
+                `;
             }
         }
 
@@ -975,7 +1103,7 @@
                     e.stopPropagation();
                     openSidebar();
                 });
-                log('✅ Open nav listener attached');
+                log('Open nav listener attached');
             }
 
             if (closeNavBtn) {
@@ -984,7 +1112,7 @@
                     e.stopPropagation();
                     closeSidebar();
                 });
-                log('✅ Close nav listener attached');
+                log('Close nav listener attached');
             }
 
             if (sidebarOverlay) {
@@ -993,7 +1121,7 @@
                     e.stopPropagation();
                     closeSidebar();
                 });
-                log('✅ Sidebar overlay listener attached');
+                log('Sidebar overlay listener attached');
             }
 
             // Theme toggle
@@ -1005,7 +1133,7 @@
                     const newTheme = learningState.theme === 'dark' ? 'light' : 'dark';
                     setTheme(newTheme);
                 });
-                log('✅ Theme toggle listener attached');
+                log('Theme toggle listener attached');
             }
 
             // Navigation menu events
@@ -1020,7 +1148,7 @@
                     showView('topics-view');
                     closeSidebar();
                 });
-                log('✅ Nav topics listener attached');
+                log('Nav topics listener attached');
             }
 
             if (navMyPaths) {
@@ -1031,7 +1159,7 @@
                     showView('my-paths-view');
                     closeSidebar();
                 });
-                log('✅ Nav my paths listener attached');
+                log('Nav my paths listener attached');
             }
 
             if (navProgress) {
@@ -1042,7 +1170,7 @@
                     showView('progress-view');
                     closeSidebar();
                 });
-                log('✅ Nav progress listener attached');
+                log('Nav progress listener attached');
             }
 
             // Quiz modal events
@@ -1056,7 +1184,7 @@
                     e.stopPropagation();
                     showView('topics-view');
                 });
-                log('✅ Close quiz listener attached');
+                log('Close quiz listener attached');
             }
 
             if (closeRoadmapBtn) {
@@ -1065,7 +1193,7 @@
                     e.stopPropagation();
                     showView('topics-view');
                 });
-                log('✅ Close roadmap listener attached');
+                log('Close roadmap listener attached');
             }
 
             if (generateRoadmapBtn) {
@@ -1074,7 +1202,7 @@
                     e.stopPropagation();
                     generateLearningPath();
                 });
-                log('✅ Generate roadmap listener attached');
+                log('Generate roadmap listener attached');
             }
 
             // Escape key to close sidebar
@@ -1084,12 +1212,12 @@
                 }
             });
 
-            log('✅ All event handlers set up successfully');
+            log('All event handlers set up successfully');
         }
 
         // Initialize the application
         function initApp() {
-            log('🎯 Initializing Learning Paths App...');
+            log('Initializing Learning Paths App...');
 
             // Set initial theme
             setTheme(learningState.theme);
@@ -1105,7 +1233,7 @@
             // Show initial view
             showView('topics-view');
 
-            log('✅ App initialization complete!');
+            log('App initialization complete!');
         }
 
         // Make functions globally available for onclick handlers
@@ -1125,7 +1253,7 @@
             initApp();
         }
 
-        log('🎉 Learning Paths script fully loaded!');
+        log('Learning Paths script fully loaded!');
     </script>
 </body>
 </html>

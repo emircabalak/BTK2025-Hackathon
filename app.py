@@ -76,13 +76,17 @@ class LearningPath(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
-# Prompts
+# Enhanced Prompts with Better Report Generation
 prompts = {
     'tr': {
         'debate_system': "Sen bir münazara yapay zekasısın. Konu: '{topic}'. Senin görevin bu konuyu '{stance}' pozisyonundan savunmak. Kullanıcının argümanlarına mantıklı ve ikna edici karşı argümanlar sun.",
         'report_system': """Aşağıdaki münazara geçmişini analiz et ve JSON formatında bir performans raporu oluştur. 
 
-        ÖNEMLİ: Sadece kullanıcının gerçekten söylediği cümleleri kullan. Hiçbir cümleyi uydurma veya değiştirme.
+        ÖNEMLİ KURALLER:
+        1. SADECE kullanıcının gerçekten söylediği cümleleri kullan
+        2. Hiçbir cümleyi uydurma, değiştirme veya parafraz etme
+        3. Örnek cümle için kullanıcının TAM OLARAK söylediği bir cümleyi seç
+        4. Eğer uygun bir cümle bulamazsan "Genel argüman yapısında gözlemlenen durum" yaz
 
         Münazara Geçmişi:
         {conversation_history}
@@ -100,7 +104,26 @@ prompts = {
           "iknaEdicilikPuani": 7,
           "genelYorum": "Genel performans yorumu"
         }}""",
-        'schema_system': "Aşağıdaki münazara geçmişine dayanarak mermaid.js formatında bir argüman haritası oluştur: {conversation_history}",
+        'schema_system': """Aşağıdaki münazara metnini analiz et ve metindeki mantıksal akışı temsil eden bir Mermaid.js şeması oluştur.
+
+        Kurallar:
+        1. Çıktı, sadece ve sadece geçerli bir Mermaid.js `graph TD` (Top-Down) sözdizimi içermelidir.
+        2. Kullanıcının ana argümanlarını özetleyerek dikdörtgen kutular içine al. Örn: A["Ana Argüman 1"]
+        3. Kullanıcının bu ana argümanları desteklemek için sunduğu alt fikirleri veya örnekleri yuvarlak kenarlı kutular içine al. Örn: B("Destekleyici Fikir 1.1")
+        4. AI Münazır'ın, kullanıcının argümanlarına veya fikirlerine getirdiği karşı argümanları eşkenar dörtgen (rhombus) şekli içine al. Örn: C{{"Karşı Argüman 1"}}
+        5. Okları (`-->`) kullanarak argümanlar, destekleyici fikirler ve karşı argümanlar arasındaki mantıksal bağlantıyı göster.
+        6. Metinleri kısa ve öz tut, cümlenin tamamını değil, fikrin özetini yaz. Maksimum 5-6 kelime kullan.
+        7. Yanıtın doğrudan 'graph TD' ile başlamalıdır. Öncesinde veya sonrasında başka hiçbir metin, açıklama veya kod bloğu olmamalıdır.
+        8. Türkçe karakterleri çıkararak sadece ASCII karakterler kullan.
+        9. Tırnak işaretlerini düzgün kaçırma yap: ["Metin"] veya ("Metin") veya {{"Metin"}} formatında.
+
+        Münazara Metni:
+        \"\"\"
+        {conversation_history}
+        \"\"\"
+
+        Mermaid.js Çıktısı:
+        """,
         'profile_system': "Aşağıdaki münazara özet verilerine dayanarak bir münazır profili analizi yap: {summary_data}",
         'quiz_system': """Konu: {topic}
 
@@ -149,13 +172,36 @@ prompts = {
         'debate_system': "You are a debate AI. The topic is: '{topic}'. Your role is to argue from the '{stance}' stance. Provide logical and persuasive counter-arguments to the user's points.",
         'report_system': """Analyze the following debate history and create a performance report in JSON format.
 
-        IMPORTANT: Only use sentences that the user actually said. Do not fabricate or modify any sentences.
+        IMPORTANT RULES:
+        1. ONLY use sentences that the user actually said
+        2. Do not fabricate, modify, or paraphrase any sentences
+        3. For example sentences, select exactly what the user said
+        4. If no suitable sentence is found, write "General observation in argument structure"
 
         Debate History:
         {conversation_history}
 
         Report format: (same as Turkish version)""",
-        'schema_system': "Create an argument map in mermaid.js format based on the following debate history: {conversation_history}",
+        'schema_system': """Analyze the following debate transcript and create a Mermaid.js diagram representing the logical flow of the text.
+
+        Rules:
+        1. The output must be only and exclusively valid Mermaid.js `graph TD` (Top-Down) syntax.
+        2. Summarize the user's main arguments and place them in rectangular boxes. E.g., A["Main Argument 1"]
+        3. Place the sub-ideas or examples the user provides to support these main arguments in round-edged boxes. E.g., B("Supporting Idea 1.1")
+        4. Place the AI Debater's counter-arguments to the user's arguments or ideas in rhombus shapes. E.g., C{{"Counter-Argument 1"}}
+        5. Use arrows (`-->`) to show the logical connection between arguments, supporting ideas, and counter-arguments.
+        6. Keep the texts short and concise; write a summary of the idea, not the full sentence. Maximum 5-6 words.
+        7. Your response must start directly with 'graph TD'. There should be no other text, explanation, or code blocks before or after it.
+        8. Use only ASCII characters, avoid special characters.
+        9. Properly escape quotes: use ["Text"] or ("Text") or {{"Text"}} format.
+
+        Debate Transcript:
+        \"\"\"
+        {conversation_history}
+        \"\"\"
+
+        Mermaid.js Output:
+        """,
         'profile_system': "Based on the following summary data, perform a debater profile analysis: {summary_data}",
         'quiz_system': """Topic: {topic} (same format as Turkish)""",
         'roadmap_system': """User is at {level} level in "{topic}". Create a personalized learning path for this level. (same format as Turkish)"""
@@ -163,7 +209,7 @@ prompts = {
 }
 
 
-# Helper Functions
+# Enhanced Helper Functions
 def extract_user_sentences(conversation_history):
     """Extract only user sentences from conversation history"""
     user_sentences = []
@@ -171,26 +217,37 @@ def extract_user_sentences(conversation_history):
     for line in lines:
         if line.strip().startswith('User:'):
             sentence = line.replace('User:', '').strip()
-            if sentence:
+            if sentence and len(sentence) > 10:  # Only meaningful sentences
                 user_sentences.append(sentence)
     return user_sentences
 
 
-def validate_report_sentences(report_data, user_sentences):
-    """Validate that report only contains actual user sentences"""
+def validate_and_fix_report(report_data, user_sentences):
+    """Enhanced validation that ensures report accuracy"""
+    if not report_data or not isinstance(report_data, dict):
+        return report_data
+
+    # Check if there's an example sentence section
     if 'gelistirilmesiGerekenNokta' in report_data and 'ornekCumle' in report_data['gelistirilmesiGerekenNokta']:
         example_sentence = report_data['gelistirilmesiGerekenNokta']['ornekCumle']
 
-        # Check if the example sentence actually exists in user sentences
-        found = False
+        # Validate the example sentence exists in user's actual statements
+        sentence_found = False
+        best_match = None
+
         for user_sentence in user_sentences:
-            if example_sentence.lower().strip() in user_sentence.lower().strip() or \
-                    user_sentence.lower().strip() in example_sentence.lower().strip():
-                found = True
+            # Check for exact match or substantial overlap
+            if (example_sentence.lower().strip() in user_sentence.lower().strip() or
+                    user_sentence.lower().strip() in example_sentence.lower().strip()):
+                sentence_found = True
+                best_match = user_sentence
                 break
 
-        if not found:
-            # Replace with a generic message if no matching sentence found
+        if sentence_found and best_match:
+            # Use the actual user sentence
+            report_data['gelistirilmesiGerekenNokta']['ornekCumle'] = best_match
+        else:
+            # If no match found, use a generic statement
             report_data['gelistirilmesiGerekenNokta']['ornekCumle'] = "Genel argüman yapısında gözlemlenen durum"
 
     return report_data
@@ -204,7 +261,7 @@ def index():
     return render_template('index.html')
 
 
-# Learning paths route - ENSURE THIS IS PROPERLY REGISTERED
+# Learning paths route - NEW ROUTE
 @app.route('/ogrenme-yollari')
 def learning_paths():
     """Learning paths main page"""
@@ -303,6 +360,7 @@ def handle_report():
 
         # Extract user sentences for validation
         user_sentences = extract_user_sentences(conversation_history)
+        print(f"Extracted {len(user_sentences)} user sentences for validation")
 
         report_prompt = prompts[lang]["report_system"].format(conversation_history=conversation_history)
 
@@ -313,8 +371,8 @@ def handle_report():
         cleaned_json_string = response_text.strip().replace("```json", "").replace("```", "").strip()
         report_json = json.loads(cleaned_json_string)
 
-        # Validate and fix report sentences
-        report_json = validate_report_sentences(report_json, user_sentences)
+        # Enhanced validation and fixing
+        report_json = validate_and_fix_report(report_json, user_sentences)
 
         if 'user_id' in session:
             schema_prompt = prompts[lang]["schema_system"].format(conversation_history=conversation_history)
@@ -602,26 +660,48 @@ def generate_learning_path(topic_id):
         return jsonify({'error': str(e)}), 500
 
 
+# Replace the existing get_user_learning_paths function in your app.py with this corrected version
+
 @app.route('/api/learning-paths', methods=['GET'])
 def get_user_learning_paths():
     """Get user's learning paths"""
     if 'user_id' not in session:
         return jsonify({'error': 'Login required'}), 401
 
-    paths = LearningPath.query.filter_by(user_id=session['user_id']).all()
-    result = []
+    try:
+        paths = LearningPath.query.filter_by(user_id=session['user_id']).all()
+        result = []
 
-    for path in paths:
-        topic = LearningTopic.query.get(path.topic_id)
-        result.append({
-            'id': path.id,
-            'topic_name': topic.name,
-            'roadmap': json.loads(path.roadmap_data),
-            'progress': json.loads(path.progress),
-            'timestamp': path.timestamp.strftime('%d-%m-%Y')
-        })
+        for path in paths:
+            # Get the topic information
+            topic = LearningTopic.query.get(path.topic_id)
+            topic_name = topic.name if topic else "Unknown Topic"
 
-    return jsonify(result)
+            # Parse the roadmap data
+            try:
+                roadmap = json.loads(path.roadmap_data)
+            except json.JSONDecodeError:
+                roadmap = {"title": "Invalid Roadmap", "sections": []}
+
+            # Parse the progress data
+            try:
+                progress = json.loads(path.progress)
+            except json.JSONDecodeError:
+                progress = {}
+
+            result.append({
+                'id': path.id,
+                'topic_name': topic_name,
+                'roadmap': roadmap,
+                'progress': progress,
+                'timestamp': path.timestamp.strftime('%d-%m-%Y')
+            })
+
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"Error in get_user_learning_paths: {e}")
+        return jsonify({'error': 'Failed to load learning paths'}), 500
 
 
 @app.route('/api/update-progress', methods=['POST'])
