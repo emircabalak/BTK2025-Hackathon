@@ -13,22 +13,35 @@ services:
       - FLASK_ENV=production
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-YOUR_API_KEY_HERE}
       - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
     volumes:
-      # Veritabanının persist olması için
-      - ./debate_arena.db:/app/debate_arena.db
+      # Veritabanı dosyasının persist olması için
+      - munazara_db:/app
+      # Logs için (opsiyonel)
+      - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5001/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
     networks:
       - munazara-network
+    # Resource limits (opsiyonel ama önerilen)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
 networks:
   munazara-network:
     driver: bridge
 
 volumes:
-  munazara-data:
+  munazara_db:
+    driver: local
