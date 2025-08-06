@@ -5,151 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Öğrenme Yolları - Münazara Arenası</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.2s, color 0.2s;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        /* Dark mode */
+        .dark {
+            background-color: #1a1a1a;
+            color: #e5e5e5;
         }
-        .slide-in { animation: slideIn 0.3s ease-out; }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
 
-        body { font-family: 'Inter', sans-serif; }
-
-        /* Fixed sidebar that properly slides */
+        /* Sidebar animations */
         .sidebar {
             transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            will-change: transform;
+            transition: transform 0.3s ease;
         }
         .sidebar.open {
             transform: translateX(0);
         }
 
-        .sidebar-overlay {
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .learning-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .learning-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Enhanced button styles */
-        .btn-primary {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            border: 2px solid #0284c7;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-            transition: all 0.2s ease;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            border: 2px solid #4f46e5;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .quiz-option {
-            transition: all 0.2s ease;
-            border: 2px solid #e5e7eb;
-        }
-        .quiz-option:hover {
-            border-color: #3b82f6;
-            background-color: rgba(59, 130, 246, 0.05);
-            transform: translateX(4px);
-        }
-
-        .progress-bar {
-            transition: width 0.3s ease;
-        }
-
-        .task-item {
-            transition: all 0.2s ease;
-        }
-        .task-item:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-
-        .section-header {
-            border-left: 4px solid #3b82f6;
+        /* Simple hover effects */
+        .hover-lift:hover {
+            transform: translateY(-2px);
         }
 
         /* Theme toggle */
         .theme-toggle {
+            width: 52px;
+            height: 28px;
             background: #e5e7eb;
-            transition: all 0.3s ease;
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
+
         .dark .theme-toggle {
             background: #374151;
         }
+
         .theme-toggle-circle {
-            transition: all 0.3s ease;
-            background: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .dark .theme-toggle-circle {
+            transform: translateX(24px);
             background: #1f2937;
-            transform: translateX(28px);
+        }
+
+        /* Simple animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease; }
+
+        /* Alert styles */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid #3b82f6;
+            background: #eff6ff;
+        }
+        .dark .alert {
+            background: #1e3a8a;
+            color: #bfdbfe;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-gray-50 text-gray-900 min-h-screen transition-colors duration-200">
 
     <!-- Navigation Sidebar -->
-    <div id="nav-sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 shadow-2xl">
+    <div id="nav-sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-lg border-r border-gray-200">
         <div class="flex flex-col h-full">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Öğrenme Yolları</h2>
-                    <button id="close-nav" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+                    <h2 class="text-xl font-semibold">Öğrenme Yolları</h2>
+                    <button id="close-nav" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
             </div>
 
             <div class="flex-1 overflow-y-auto p-4">
-                <div class="space-y-3">
-                    <button id="nav-topics" class="nav-btn w-full text-left p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium transition-all">
+                <div class="space-y-2">
+                    <button id="nav-topics" class="nav-btn w-full text-left p-3 rounded-lg bg-blue-50 text-blue-700 font-medium">
                         Konular
                     </button>
-                    <button id="nav-my-paths" class="nav-btn w-full text-left p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all">
-                        Öğrenme Yollarım
+                    <button id="nav-my-paths" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+                        Yol Haritaları
                     </button>
-                    <button id="nav-progress" class="nav-btn w-full text-left p-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all">
+                    <button id="nav-progress" class="nav-btn w-full text-left p-3 rounded-lg hover:bg-gray-100 font-medium transition-colors">
                         İlerleme Durumu
                     </button>
                 </div>
             </div>
 
-            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-                <a href="/" class="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+            <div class="p-4 border-t border-gray-200">
+                <a href="/" class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
                     <span>Ana Sayfaya Dön</span>
                 </a>
@@ -158,62 +128,63 @@
     </div>
 
     <!-- Sidebar Overlay -->
-    <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Main Content -->
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
             <div class="px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <button id="open-nav" class="p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/>
+                    <button id="open-nav" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18"/>
                         </svg>
                     </button>
 
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Kişiselleştirilmiş Öğrenme</h1>
+                    <h1 class="text-xl font-semibold">Kişiselleştirilmiş Öğrenme</h1>
 
                     <div class="flex items-center space-x-4">
-                        <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <a href="/" class="px-3 py-2 rounded-md text-sm hover:bg-gray-100 transition-colors">
                             Münazara
                         </a>
 
                         <!-- Theme Toggle -->
                         <button id="theme-toggle" class="theme-toggle relative w-14 h-7 rounded-full p-1 transition-colors duration-300">
-                            <div class="theme-toggle-circle w-5 h-5 rounded-full flex items-center justify-center">
-                                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-500">
-                                    <circle cx="12" cy="12" r="5"/>
-                                    <path d="M12 1v2"/><path d="M12 21v2"/>
-                                    <path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/>
-                                    <path d="M1 12h2"/><path d="M21 12h2"/>
-                                    <path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/>
-                                </svg>
-                                <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-indigo-400 hidden">
-                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                                </svg>
-                            </div>
-                        </button>
+                        <div class="theme-toggle-circle w-5 h-5 rounded-full flex items-center justify-center">
+                            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-500">
+                                <circle cx="12" cy="12" r="5"/>
+                                <path d="M12 1v2"/><path d="M12 21v2"/>
+                                <path d="m4.22 4.22 1.42 1.42"/><path d="m18.36 18.36 1.42 1.42"/>
+                                <path d="M1 12h2"/><path d="M21 12h2"/>
+                                <path d="m4.22 19.78 1.42-1.42"/><path d="m18.36 5.64 1.42-1.42"/>
+                            </svg>
+                            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-indigo-400 hidden">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </div>
+                    </button>
 
-                        <span id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-300">Yükleniyor...</span>
+                        <span id="user-name" class="text-sm text-gray-700">Yükleniyor...</span>
                     </div>
                 </div>
             </div>
         </header>
 
         <!-- Content Area -->
-        <main id="main-content" class="p-6">
+        <main id="main-content" class="p-6 max-w-7xl mx-auto">
+
             <!-- Topics Grid (Default View) -->
             <div id="topics-view" class="fade-in">
                 <div class="mb-8">
-                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Öğrenme Konularını Keşfedin</h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-400">Size uygun seviyede kişiselleştirilmiş öğrenme yolları oluşturmak için önce yetkinlik seviyenizi belirleyelim.</p>
+                    <h2 class="text-3xl font-semibold mb-4">Öğrenme Konularını Keşfedin</h2>
+                    <p class="text-lg text-gray-600">Size uygun seviyede kişiselleştirilmiş öğrenme yolları oluşturmak için önce yetkinlik seviyenizi belirleyelim.</p>
                 </div>
 
                 <div id="topics-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="col-span-full text-center py-12">
-                        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p class="text-xl text-gray-600 dark:text-gray-400">Konular yükleniyor...</p>
+                    <div class="col-span-full text-center py-16">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Konular yükleniyor...</p>
                     </div>
                 </div>
             </div>
@@ -221,28 +192,28 @@
             <!-- Quiz View -->
             <div id="quiz-view" class="hidden">
                 <div class="max-w-4xl mx-auto">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
-                        <div class="p-8 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center justify-between mb-6">
-                                <h2 id="quiz-title" class="text-3xl font-bold text-gray-900 dark:text-white">Quiz</h2>
-                                <button id="close-quiz" class="p-3 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 id="quiz-title" class="text-2xl font-semibold">Quiz</h2>
+                                <button id="close-quiz" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 transition-colors">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 6L6 18M6 6l12 12"/>
                                     </svg>
                                 </button>
                             </div>
                             <div>
-                                <div class="flex justify-between text-lg text-gray-600 dark:text-gray-400 mb-3">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
                                     <span>İlerleme</span>
                                     <span id="quiz-progress-text">0/10</span>
                                 </div>
-                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                                    <div id="quiz-progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full" style="width: 0%"></div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="quiz-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="quiz-container" class="p-8">
+                        <div id="quiz-container" class="p-6">
                             <!-- Quiz questions will be loaded here -->
                         </div>
                     </div>
@@ -254,15 +225,15 @@
                 <div class="max-w-6xl mx-auto">
                     <div class="mb-8 flex items-center justify-between">
                         <div>
-                            <h2 id="roadmap-title" class="text-4xl font-bold text-gray-900 dark:text-white">Öğrenme Yolu</h2>
-                            <p id="roadmap-level" class="text-xl text-gray-600 dark:text-gray-400 mt-2">Seviye: Belirleniyor...</p>
+                            <h2 id="roadmap-title" class="text-3xl font-semibold">Öğrenme Yolu</h2>
+                            <p id="roadmap-level" class="text-lg text-gray-600 mt-2">Seviye: Belirleniyor...</p>
                         </div>
-                        <button id="close-roadmap" class="btn-secondary px-6 py-3 text-white rounded-xl font-medium transition-all">
+                        <button id="close-roadmap" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
                             Konulara Dön
                         </button>
                     </div>
 
-                    <div id="roadmap-content" class="space-y-8">
+                    <div id="roadmap-content" class="space-y-6">
                         <!-- Roadmap sections will be loaded here -->
                     </div>
                 </div>
@@ -271,14 +242,14 @@
             <!-- My Paths View -->
             <div id="my-paths-view" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Öğrenme Yollarım</h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-400">Aktif öğrenme yollarınız ve ilerleme durumunuz.</p>
+                    <h2 class="text-3xl font-semibold mb-4">Yol Haritaları</h2>
+                    <p class="text-lg text-gray-600">Aktif öğrenme yollarınız ve ilerleme durumunuz.</p>
                 </div>
 
                 <div id="my-paths-content" class="space-y-6">
-                    <div class="text-center py-12">
-                        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p class="text-xl text-gray-600 dark:text-gray-400">Yollar yükleniyor...</p>
+                    <div class="text-center py-16">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Yollar yükleniyor...</p>
                     </div>
                 </div>
             </div>
@@ -286,11 +257,11 @@
             <!-- Progress View -->
             <div id="progress-view" class="hidden">
                 <div class="mb-8">
-                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">İlerleme Durumu</h2>
-                    <p class="text-xl text-gray-600 dark:text-gray-400">Tüm konulardaki ilerlemenizi ve başarılarınızı görüntüleyin.</p>
+                    <h2 class="text-3xl font-semibold mb-4">İlerleme Durumu</h2>
+                    <p class="text-lg text-gray-600">Tüm konulardaki ilerlemenizi ve başarılarınızı görüntüleyin.</p>
                 </div>
 
-                <div id="progress-content" class="space-y-8">
+                <div id="progress-content" class="space-y-6">
                     <!-- Progress content will be loaded here -->
                 </div>
             </div>
@@ -299,17 +270,16 @@
 
     <!-- Quiz Result Modal -->
     <div id="quiz-result-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div class="text-center">
-                <div id="result-icon" class="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center bg-green-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <path d="m9 11 3 3L22 4"/>
+                <div id="result-icon" class="mx-auto mb-6 w-16 h-16 rounded-full flex items-center justify-center bg-green-500 text-white">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M9 11l3 3L22 4"/>
                     </svg>
                 </div>
-                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Değerlendirme Tamamlandı!</h3>
-                <p id="result-text" class="text-lg text-gray-600 dark:text-gray-400 mb-8">Sonuç yükleniyor...</p>
-                <button id="generate-roadmap" class="btn-primary w-full py-4 text-white text-lg rounded-xl font-semibold transition-all">
+                <h3 class="text-2xl font-semibold mb-4">Değerlendirme Tamamlandı!</h3>
+                <p id="result-text" class="text-gray-600 mb-8">Sonuç yükleniyor...</p>
+                <button id="generate-roadmap" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
                     Öğrenme Yolumu Oluştur
                 </button>
             </div>
@@ -317,10 +287,10 @@
     </div>
 
     <script>
-        console.log('Learning Paths JavaScript initializing...');
+        console.log('🚀 Learning Paths initializing...');
 
         // Global state
-        const learningState = {
+        const state = {
             currentTopicId: null,
             currentQuiz: null,
             currentQuestion: 0,
@@ -332,78 +302,112 @@
 
         // Utility functions
         function log(message, ...args) {
-            console.log(`[LearningPaths] ${message}`, ...args);
+            console.log(`[Learning] ${message}`, ...args);
         }
 
-        function error(message, ...args) {
-            console.error(`[LearningPaths] ${message}`, ...args);
+        function showComingSoon(feature) {
+            alert(`"${feature}" özelliği yakında eklenecek! 🚀`);
         }
 
         // Theme management
         function setTheme(theme) {
-            learningState.theme = theme;
+            state.theme = theme;
             localStorage.setItem('theme', theme);
 
-            const html = document.documentElement;
-            const lightIcon = document.getElementById('theme-icon-light');
-            const darkIcon = document.getElementById('theme-icon-dark');
+            const body = document.body;
+            const sidebar = document.getElementById('nav-sidebar');
+            const header = document.querySelector('header');
+            const themeIcon = document.querySelector('.theme-icon');
 
             if (theme === 'dark') {
-                html.classList.add('dark');
-                if (lightIcon) lightIcon.classList.add('hidden');
-                if (darkIcon) darkIcon.classList.remove('hidden');
+                body.classList.add('dark');
+                body.style.backgroundColor = '#1a1a1a';
+                body.style.color = '#e5e5e5';
+
+                if (sidebar) {
+                    sidebar.style.backgroundColor = '#2d2d2d';
+                    sidebar.style.borderColor = '#404040';
+                }
+                if (header) {
+                    header.style.backgroundColor = '#2d2d2d';
+                    header.style.borderColor = '#404040';
+                }
+                if (themeIcon) themeIcon.textContent = '🌙';
             } else {
-                html.classList.remove('dark');
-                if (lightIcon) lightIcon.classList.remove('hidden');
-                if (darkIcon) darkIcon.classList.add('hidden');
+                body.classList.remove('dark');
+                body.style.backgroundColor = '#f9fafb';
+                body.style.color = '#111827';
+
+                if (sidebar) {
+                    sidebar.style.backgroundColor = '#ffffff';
+                    sidebar.style.borderColor = '#e5e7eb';
+                }
+                if (header) {
+                    header.style.backgroundColor = '#ffffff';
+                    header.style.borderColor = '#e5e7eb';
+                }
+                if (themeIcon) themeIcon.textContent = '🌞';
             }
 
-            log('Theme set to:', theme);
+            // Update all cards and modals
+            updateElementsTheme(theme);
+        }
+
+        function updateElementsTheme(theme) {
+            const cards = document.querySelectorAll('.bg-white, [class*="bg-white"]');
+            const texts = document.querySelectorAll('.text-gray-900, .text-gray-600, .text-gray-700');
+
+            if (theme === 'dark') {
+                cards.forEach(el => {
+                    el.style.backgroundColor = '#2d2d2d';
+                    el.style.borderColor = '#404040';
+                });
+                texts.forEach(el => {
+                    if (el.classList.contains('text-gray-900')) {
+                        el.style.color = '#e5e5e5';
+                    } else if (el.classList.contains('text-gray-600') || el.classList.contains('text-gray-700')) {
+                        el.style.color = '#a1a1aa';
+                    }
+                });
+            } else {
+                cards.forEach(el => {
+                    el.style.backgroundColor = '#ffffff';
+                    el.style.borderColor = '#e5e7eb';
+                });
+                texts.forEach(el => {
+                    el.style.color = '';
+                });
+            }
         }
 
         // Navigation functions
         function openSidebar() {
-            log('Opening sidebar');
             const sidebar = document.getElementById('nav-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
 
-            if (sidebar && overlay) {
-                learningState.sidebarOpen = true;
-                sidebar.classList.add('open');
-                overlay.classList.remove('pointer-events-none', 'opacity-0');
-                overlay.classList.add('opacity-100');
-
-                // Prevent body scroll
-                document.body.style.overflow = 'hidden';
-            }
+            state.sidebarOpen = true;
+            sidebar.classList.add('open');
+            overlay.classList.remove('pointer-events-none', 'opacity-0');
+            overlay.classList.add('opacity-100');
         }
 
         function closeSidebar() {
-            log('Closing sidebar');
             const sidebar = document.getElementById('nav-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
 
-            if (sidebar && overlay) {
-                learningState.sidebarOpen = false;
-                sidebar.classList.remove('open');
-                overlay.classList.remove('opacity-100');
-                overlay.classList.add('pointer-events-none', 'opacity-0');
-
-                // Restore body scroll
-                document.body.style.overflow = '';
-            }
+            state.sidebarOpen = false;
+            sidebar.classList.remove('open');
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('pointer-events-none', 'opacity-0');
         }
 
         // View management
         function showView(viewId) {
-            log('Showing view:', viewId);
             const views = ['topics-view', 'quiz-view', 'roadmap-view', 'my-paths-view', 'progress-view'];
 
             views.forEach(id => {
                 const element = document.getElementById(id);
-                if (element) {
-                    element.classList.add('hidden');
-                }
+                if (element) element.classList.add('hidden');
             });
 
             const targetView = document.getElementById(viewId);
@@ -412,848 +416,201 @@
                 targetView.classList.add('fade-in');
             }
 
-            // Update navigation active state
             updateNavActiveState(viewId);
         }
 
         function updateNavActiveState(viewId) {
-            const navMapping = {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-700');
+                btn.classList.add('hover:bg-gray-100');
+            });
+
+            const mapping = {
                 'topics-view': 'nav-topics',
                 'my-paths-view': 'nav-my-paths',
                 'progress-view': 'nav-progress'
             };
 
-            const activeNavId = navMapping[viewId];
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-700', 'dark:text-blue-300');
-                btn.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-700');
-            });
-
-            if (activeNavId) {
-                const activeBtn = document.getElementById(activeNavId);
-                if (activeBtn) {
-                    activeBtn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-700');
-                    activeBtn.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-700', 'dark:text-blue-300');
+            const activeId = mapping[viewId];
+            if (activeId) {
+                const btn = document.getElementById(activeId);
+                if (btn) {
+                    btn.classList.remove('hover:bg-gray-100');
+                    btn.classList.add('bg-blue-50', 'text-blue-700');
                 }
             }
         }
 
-        // API functions with better error handling
-        async function apiCall(url, options = {}) {
-            try {
-                log('API call to:', url);
-                const response = await fetch(url, options);
+        // Mock API functions (since real API might not be available)
+        async function mockApiCall(endpoint) {
+            log('Mock API call:', endpoint);
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
-                }
+            // Simulate loading delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const data = await response.json();
-                log('API response received');
-                return data;
-            } catch (err) {
-                error('API call failed:', url, err);
-                throw err;
-            }
-        }
-
-        // Load topics with better error handling
-        async function loadTopics() {
-            log('Loading topics...');
-            const grid = document.getElementById('topics-grid');
-
-            if (!grid) {
-                error('Topics grid not found');
-                return;
-            }
-
-            try {
-                // Show default topics if API is not available
-                const defaultTopics = [
-                    {
-                        id: 1,
-                        name: 'Münazara Temelleri',
-                        description: 'Temel münazara teknikleri, argüman geliştirme ve karşı argüman üretme becerileri'
-                    },
-                    {
-                        id: 2,
-                        name: 'Mantık ve Eleştirel Düşünme',
-                        description: 'Mantık hataları, eleştirel analiz ve objektif değerlendirme yöntemleri'
-                    },
-                    {
-                        id: 3,
-                        name: 'Retorik ve İkna Sanatı',
-                        description: 'Etkili konuşma, ikna teknikleri ve dinleyici analizi'
-                    },
-                    {
-                        id: 4,
-                        name: 'Araştırma ve Kanıt Kullanımı',
-                        description: 'Güvenilir kaynak araştırması, kanıt değerlendirme ve veri analizi'
-                    }
+            if (endpoint === '/api/learning-topics') {
+                return [
+                    { id: 1, name: 'JavaScript Temelleri', description: 'Web geliştirme için JavaScript öğrenin' },
+                    { id: 2, name: 'Python Programlama', description: 'Veri analizi ve backend geliştirme' },
+                    { id: 3, name: 'React Framework', description: 'Modern web uygulamaları geliştirin' }
                 ];
+            }
 
-                let topics = defaultTopics;
+            if (endpoint === '/api/status') {
+                return { logged_in: true, username: 'Kullanıcı' };
+            }
 
-                try {
-                    topics = await apiCall('/api/learning-topics');
-                } catch (err) {
-                    log('Using default topics due to API error:', err.message);
-                }
+            // For other endpoints, show coming soon
+            throw new Error('Bu özellik henüz mevcut değil');
+        }
 
-                log('Topics loaded:', topics.length);
-
-                if (topics.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-xl text-gray-600 dark:text-gray-400">Henüz konu eklenmemiş.</p></div>';
-                    return;
-                }
+        // Load topics
+        async function loadTopics() {
+            try {
+                const topics = await mockApiCall('/api/learning-topics');
+                const grid = document.getElementById('topics-grid');
 
                 grid.innerHTML = topics.map(topic => `
-                    <div class="learning-card rounded-2xl p-8 text-white transform transition-all hover:scale-105" onclick="startQuiz(${topic.id})">
-                        <h3 class="text-2xl font-bold mb-4">${topic.name}</h3>
-                        <p class="text-white/90 text-lg leading-relaxed">${topic.description}</p>
-                        <div class="mt-6 flex justify-end">
-                            <div class="bg-white/20 rounded-full p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-                                </svg>
-                            </div>
+                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover-lift transition-all cursor-pointer" onclick="startQuiz(${topic.id})">
+                        <h3 class="text-xl font-semibold mb-3">${topic.name}</h3>
+                        <p class="text-gray-600 mb-4">${topic.description}</p>
+                        <div class="flex justify-end">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-600">
+                                <path d="M5 12h14m-7-7 7 7-7 7"/>
+                            </svg>
                         </div>
                     </div>
                 `).join('');
 
+                // Apply theme to new elements
+                updateElementsTheme(state.theme);
+
             } catch (err) {
-                error('Error loading topics:', err);
+                log('Error loading topics:', err);
+                const grid = document.getElementById('topics-grid');
                 grid.innerHTML = `
-                    <div class="col-span-full text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">Konular yüklenirken bir hata oluştu</p>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                        <button onclick="loadTopics()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
+                    <div class="col-span-full text-center p-8 bg-white rounded-lg border border-gray-200">
+                        <div class="alert">
+                            <strong>Bilgilendirme:</strong> Konu verileri henüz mevcut değil. Bu özellik yakında eklenecek!
+                        </div>
+                        <button onclick="loadTopics()" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            Tekrar Dene
+                        </button>
                     </div>
                 `;
+                updateElementsTheme(state.theme);
             }
         }
 
-        // Start quiz with demo data fallback
-        async function startQuiz(topicId) {
-            log('Starting quiz for topic:', topicId);
-
-            try {
-                learningState.currentTopicId = topicId;
-                learningState.currentQuestion = 0;
-                learningState.answers = [];
-
-                // Demo quiz questions for different topics
-                const demoQuizzes = {
-                    1: { // Münazara Temelleri
-                        questions: [
-                            {
-                                question: "Münazarada en önemli unsur hangisidir?",
-                                options: ["Güçlü ses tonu", "Mantıklı argümanlar", "Hızlı konuşma", "Güzel görünüm"],
-                                correct: 1
-                            },
-                            {
-                                question: "Karşı argüman üretirken hangi yöntem en etkilidir?",
-                                options: ["Rakibin sözünü kesmek", "Kendi görüşünü tekrarlamak", "Rakibin argümanını analiz etmek", "Yüksek sesle konuşmak"],
-                                correct: 2
-                            },
-                            {
-                                question: "Başarılı bir münazara için gerekli olan temel özellik nedir?",
-                                options: ["Hazırlık", "Şans", "Deneyim", "Yaş"],
-                                correct: 0
-                            }
-                        ]
-                    },
-                    2: { // Mantık ve Eleştirel Düşünme
-                        questions: [
-                            {
-                                question: "Ad Hominem mantık hatası nedir?",
-                                options: ["Argümana değil kişiye saldırı", "Yanlış analoji", "Çok seçenekli hata", "Dairesel mantık"],
-                                correct: 0
-                            },
-                            {
-                                question: "Eleştirel düşünmenin temel unsuru hangisidir?",
-                                options: ["Önyargı", "Objektif analiz", "Hızlı karar verme", "Duygusal tepki"],
-                                correct: 1
-                            }
-                        ]
-                    }
-                };
-
-                let quizData;
-                try {
-                    quizData = await apiCall(`/api/quiz/${topicId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ lang: 'tr' })
-                    });
-                    learningState.currentQuiz = quizData.questions;
-                } catch (err) {
-                    log('Using demo quiz due to API error:', err.message);
-                    quizData = demoQuizzes[topicId] || demoQuizzes[1];
-                    learningState.currentQuiz = quizData.questions;
-                }
-
-                log('Quiz loaded with', learningState.currentQuiz.length, 'questions');
-
-                // Set quiz title
-                const quizTitle = document.getElementById('quiz-title');
-                if (quizTitle) {
-                    const topicNames = {
-                        1: 'Münazara Temelleri',
-                        2: 'Mantık ve Eleştirel Düşünme',
-                        3: 'Retorik ve İkna Sanatı',
-                        4: 'Araştırma ve Kanıt Kullanımı'
-                    };
-                    quizTitle.textContent = `${topicNames[topicId] || 'Konu'} - Seviye Belirleme Testi`;
-                }
-
-                showView('quiz-view');
-                displayQuestion();
-
-            } catch (err) {
-                error('Error starting quiz:', err);
-                alert('Quiz başlatılırken bir hata oluştu: ' + err.message);
-            }
+        // Start quiz (mock)
+        function startQuiz(topicId) {
+            showComingSoon('Quiz Sistemi');
         }
 
-        // Display question
-        function displayQuestion() {
-            log('Displaying question:', learningState.currentQuestion + 1);
-
-            if (!learningState.currentQuiz || learningState.currentQuestion >= learningState.currentQuiz.length) {
-                error('No quiz data or question out of range');
-                return;
-            }
-
-            const question = learningState.currentQuiz[learningState.currentQuestion];
-            const container = document.getElementById('quiz-container');
-
-            if (!container) {
-                error('Quiz container not found');
-                return;
-            }
-
-            // Update progress
-            const progress = ((learningState.currentQuestion + 1) / learningState.currentQuiz.length) * 100;
-            const progressBar = document.getElementById('quiz-progress-bar');
-            const progressText = document.getElementById('quiz-progress-text');
-
-            if (progressBar) progressBar.style.width = `${progress}%`;
-            if (progressText) progressText.textContent = `${learningState.currentQuestion + 1}/${learningState.currentQuiz.length}`;
-
-            container.innerHTML = `
-                <div class="mb-8">
-                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-                        ${learningState.currentQuestion + 1}. ${question.question}
-                    </h3>
-                    <div class="space-y-4">
-                        ${question.options.map((option, index) => `
-                            <button class="quiz-option w-full text-left p-6 rounded-xl transition-all" onclick="selectAnswer(${index})">
-                                <span class="font-bold text-blue-600 dark:text-blue-400 mr-4 text-lg">${String.fromCharCode(65 + index)}.</span>
-                                <span class="text-lg">${option}</span>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Select answer
-        function selectAnswer(answer) {
-            log('Answer selected:', answer);
-            learningState.answers.push(answer);
-
-            if (learningState.currentQuestion < learningState.currentQuiz.length - 1) {
-                learningState.currentQuestion++;
-                displayQuestion();
-            } else {
-                completeQuiz();
-            }
-        }
-
-        // Complete quiz
-        async function completeQuiz() {
-            log('Completing quiz...');
-
-            try {
-                // Calculate score
-                let score = 0;
-                learningState.currentQuiz.forEach((question, index) => {
-                    if (learningState.answers[index] === question.correct) {
-                        score++;
-                    }
-                });
-
-                log('Quiz completed with score:', score);
-
-                // Determine level based on score
-                const percentage = (score / learningState.currentQuiz.length) * 100;
-                let level;
-                if (percentage >= 80) level = 'master';
-                else if (percentage >= 60) level = 'senior';
-                else if (percentage >= 40) level = 'mid';
-                else if (percentage >= 20) level = 'entry';
-                else level = 'beginner';
-
-                try {
-                    const result = await apiCall('/api/quiz-result', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            topic_id: learningState.currentTopicId,
-                            score: score
-                        })
-                    });
-                    learningState.userLevel = result.level;
-                } catch (err) {
-                    log('Using calculated level due to API error:', err.message);
-                    learningState.userLevel = level;
-                }
-
-                showQuizResult(score, learningState.userLevel);
-
-            } catch (err) {
-                error('Error completing quiz:', err);
-                alert('Quiz tamamlanırken bir hata oluştu: ' + err.message);
-            }
-        }
-
-        // Show quiz result
-        function showQuizResult(score, level) {
-            log('Showing quiz result:', score, level);
-
-            const modal = document.getElementById('quiz-result-modal');
-            const resultText = document.getElementById('result-text');
-            const resultIcon = document.getElementById('result-icon');
-
-            if (!modal || !resultText || !resultIcon) {
-                error('Result modal elements not found');
-                return;
-            }
-
-            const levelTexts = {
-                'beginner': 'Başlangıç Seviyesi',
-                'entry': 'Giriş Seviyesi',
-                'mid': 'Orta Seviye',
-                'senior': 'İleri Seviye',
-                'master': 'Uzman Seviyesi'
-            };
-
-            const levelColors = {
-                'beginner': 'bg-gray-500',
-                'entry': 'bg-blue-500',
-                'mid': 'bg-green-500',
-                'senior': 'bg-purple-500',
-                'master': 'bg-yellow-500'
-            };
-
-            resultIcon.className = `mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center text-white ${levelColors[level]}`;
-            resultText.textContent = `${score}/${learningState.currentQuiz.length} doğru cevap ile ${levelTexts[level]} olarak değerlendirildiniz.`;
-
-            modal.classList.remove('hidden');
-        }
-
-        // Generate learning path with demo data
-        async function generateLearningPath() {
-            log('Generating learning path...');
-
-            try {
-                const modal = document.getElementById('quiz-result-modal');
-                if (modal) modal.classList.add('hidden');
-
-                const demoRoadmaps = {
-                    1: { // Münazara Temelleri
-                        title: 'Münazara Temelleri Öğrenme Yolu',
-                        sections: [
-                            {
-                                title: 'Temel Kavramlar',
-                                description: 'Münazaranın temel unsurlarını öğrenin',
-                                tasks: [
-                                    'Münazara tanımını ve türlerini araştırın',
-                                    'Temel münazara kurallarını öğrenin',
-                                    'Argüman ve iddia arasındaki farkı anlayın'
-                                ]
-                            },
-                            {
-                                title: 'Argüman Geliştirme',
-                                description: 'Güçlü argümanlar oluşturmayı öğrenin',
-                                tasks: [
-                                    'PREP metodunu uygulayın',
-                                    'Kanıt türlerini öğrenin',
-                                    'Örnek argümanlar analiz edin'
-                                ]
-                            }
-                        ],
-                        projects: {
-                            micro: {
-                                title: 'Mini Münazara',
-                                description: 'Basit bir konuda 3 dakikalık argüman geliştirin'
-                            },
-                            main: {
-                                title: 'Kapsamlı Münazara Analizi',
-                                description: 'Gerçek bir münazarayı analiz edin ve rapor hazırlayın'
-                            }
-                        }
-                    }
-                };
-
-                let roadmap;
-                try {
-                    roadmap = await apiCall(`/api/learning-path/${learningState.currentTopicId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            level: learningState.userLevel,
-                            lang: 'tr'
-                        })
-                    });
-                } catch (err) {
-                    log('Using demo roadmap due to API error:', err.message);
-                    roadmap = demoRoadmaps[learningState.currentTopicId] || demoRoadmaps[1];
-                }
-
-                log('Roadmap generated:', roadmap);
-                displayRoadmap(roadmap);
-
-            } catch (err) {
-                error('Error generating learning path:', err);
-                alert('Öğrenme yolu oluşturulurken bir hata oluştu: ' + err.message);
-            }
-        }
-
-        // Display roadmap
-        function displayRoadmap(roadmap) {
-            log('Displaying roadmap');
-
-            const title = document.getElementById('roadmap-title');
-            const level = document.getElementById('roadmap-level');
-            const content = document.getElementById('roadmap-content');
-
-            if (!title || !content) {
-                error('Roadmap elements not found');
-                return;
-            }
-
-            title.textContent = roadmap.title;
-            if (level) {
-                const levelTexts = {
-                    'beginner': 'Başlangıç Seviyesi',
-                    'entry': 'Giriş Seviyesi',
-                    'mid': 'Orta Seviye',
-                    'senior': 'İleri Seviye',
-                    'master': 'Uzman Seviyesi'
-                };
-                level.textContent = `Seviyeniz: ${levelTexts[learningState.userLevel] || learningState.userLevel}`;
-            }
-
-            content.innerHTML = `
-                ${roadmap.sections.map((section, sectionIndex) => `
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <div class="section-header p-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">${section.title}</h3>
-                            <p class="text-lg text-gray-600 dark:text-gray-400">${section.description}</p>
-                        </div>
-                        <div class="p-8">
-                            <div class="space-y-4">
-                                ${section.tasks.map((task, taskIndex) => `
-                                    <div class="task-item flex items-center p-4 rounded-xl border border-gray-200 dark:border-gray-600 transition-all">
-                                        <input type="checkbox" id="task-${sectionIndex}-${taskIndex}" class="mr-4 text-blue-600 w-5 h-5">
-                                        <label for="task-${sectionIndex}-${taskIndex}" class="flex-1 text-lg text-gray-700 dark:text-gray-300 cursor-pointer">${task}</label>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-
-                <div class="grid md:grid-cols-2 gap-8 mt-12">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-                        <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">Mikro</div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Mikro Proje</h3>
-                        </div>
-                        <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-4 text-xl">${roadmap.projects.micro.title}</h4>
-                        <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">${roadmap.projects.micro.description}</p>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-                        <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">Ana</div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ana Proje</h3>
-                        </div>
-                        <h4 class="font-bold text-purple-600 dark:text-purple-400 mb-4 text-xl">${roadmap.projects.main.title}</h4>
-                        <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">${roadmap.projects.main.description}</p>
-                    </div>
-                </div>
-            `;
-
-            showView('roadmap-view');
-        }
-
-        // Load my paths with demo data fallback
-        async function loadMyPaths() {
-            log('Loading my paths...');
-
+        // Load my paths (mock)
+        function loadMyPaths() {
             const content = document.getElementById('my-paths-content');
-            if (!content) {
-                error('My paths content not found');
-                return;
-            }
-
-            try {
-                let paths = [];
-                try {
-                    paths = await apiCall('/api/learning-paths');
-                } catch (err) {
-                    log('API not available, showing empty state:', err.message);
-                }
-
-                log('My paths loaded:', paths.length);
-
-                if (paths.length === 0) {
-                    content.innerHTML = `
-                        <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                            <div class="text-6xl mb-6">Kitap</div>
-                            <h3 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Henüz öğrenme yolunuz yok</h3>
-                            <p class="text-xl text-gray-500 dark:text-gray-400 mb-8">Bir konu seçerek ilk öğrenme yolunuzu oluşturun.</p>
-                            <button onclick="showTopicsFromMyPaths()" class="btn-primary px-8 py-4 text-white rounded-xl font-semibold text-lg">
-                                Konuları Keşfet
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                content.innerHTML = paths.map(path => `
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-                        <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">${path.topic_name}</h3>
-                                <p class="text-gray-500 dark:text-gray-400 mt-2">${path.timestamp}</p>
-                            </div>
-                            <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-4 py-2 rounded-full text-sm font-medium">
-                                Aktif
-                            </span>
-                        </div>
-
-                        <div class="mb-6">
-                            <h4 class="font-bold text-gray-900 dark:text-white mb-3 text-lg">${path.roadmap?.title || 'Öğrenme Yolu'}</h4>
-                            <div class="text-gray-600 dark:text-gray-400">
-                                ${path.roadmap?.sections?.length || 0} bölüm • ${path.roadmap?.sections?.reduce((total, section) => total + (section.tasks?.length || 0), 0) || 0} görev
-                            </div>
-                        </div>
-
-                        <div class="flex space-x-4">
-                            <button onclick="viewRoadmapDetails(${path.id})" class="btn-primary px-6 py-3 text-white rounded-xl font-medium">
-                                Devam Et
-                            </button>
-                            <button class="btn-secondary px-6 py-3 text-white rounded-xl font-medium">
-                                İlerlemeyi Gör
-                            </button>
-                        </div>
+            content.innerHTML = `
+                <div class="text-center py-16 bg-white rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4">Henüz öğrenme yolunuz yok</h3>
+                    <div class="alert">
+                        <strong>Bilgilendirme:</strong> Öğrenme yolu oluşturma sistemi henüz aktif değil. Bu özellik yakında eklenecek!
                     </div>
-                `).join('');
-
-            } catch (err) {
-                error('Error loading my paths:', err);
-                content.innerHTML = `
-                    <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">Öğrenme yolları yüklenirken bir hata oluştu</p>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                        <button onclick="loadMyPaths()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
-                    </div>
-                `;
-            }
+                    <button onclick="showView('topics-view')" class="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                        Konuları Keşfet
+                    </button>
+                </div>
+            `;
+            updateElementsTheme(state.theme);
         }
 
-        // Load progress with demo data
-        async function loadProgress() {
-            log('Loading progress...');
-
+        // Load progress (mock)
+        function loadProgress() {
             const content = document.getElementById('progress-content');
-            if (!content) return;
-
-            try {
-                let paths = [];
-                let totalTasks = 0;
-                let completedTasks = 0;
-
-                try {
-                    paths = await apiCall('/api/learning-paths');
-                    totalTasks = paths.reduce((total, path) => {
-                        return total + (path.roadmap?.sections?.reduce((sectionTotal, section) => {
-                            return sectionTotal + (section.tasks?.length || 0);
-                        }, 0) || 0);
-                    }, 0);
-                    completedTasks = paths.reduce((total, path) => {
-                        const progress = path.progress || {};
-                        return total + Object.values(progress).filter(Boolean).length;
-                    }, 0);
-                } catch (err) {
-                    log('Using demo progress data due to API error:', err.message);
-                }
-
-                if (paths.length === 0) {
-                    content.innerHTML = `
-                        <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                            <div class="text-6xl mb-6">Grafik</div>
-                            <h3 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Henüz ilerleme verisi yok</h3>
-                            <p class="text-xl text-gray-500 dark:text-gray-400 mb-8">Öğrenme yollarınızı oluşturduktan sonra ilerlemenizi burada görebilirsiniz.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-                content.innerHTML = `
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Genel İlerleme</h3>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-lg text-gray-600 dark:text-gray-400">Tamamlanan Görevler</span>
-                            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">${completedTasks}/${totalTasks}</span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4">
-                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
-                        </div>
-                        <div class="text-center">
-                            <span class="text-3xl font-bold text-gray-900 dark:text-white">${progressPercentage}%</span>
-                            <p class="text-gray-600 dark:text-gray-400">Tamamlandı</p>
-                        </div>
+            content.innerHTML = `
+                <div class="text-center py-16 bg-white rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4">Henüz ilerleme verisi yok</h3>
+                    <div class="alert">
+                        <strong>Bilgilendirme:</strong> İlerleme takip sistemi henüz aktif değil. Bu özellik yakında eklenecek!
                     </div>
-
-                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
-                        <h3 class="text-2xl font-bold text-purple-800 dark:text-purple-400 mb-4">Başarılarınız</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">${paths.length}</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Aktif Yol</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">${completedTasks}</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Tamamlanan Görev</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-green-600 dark:text-green-400">${Math.round(progressPercentage / 10)}</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Seviye</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400">${paths.length * 2}</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Proje</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-            } catch (err) {
-                error('Error loading progress:', err);
-                content.innerHTML = `
-                    <div class="text-center p-12 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                        <p class="text-red-600 dark:text-red-400 text-xl mb-4">İlerleme verileri yüklenirken bir hata oluştu</p>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6">${err.message}</p>
-                        <button onclick="loadProgress()" class="btn-primary px-6 py-3 text-white rounded-xl font-semibold">Tekrar Dene</button>
-                    </div>
-                `;
-            }
-        }
-
-        // Helper functions
-        function showTopicsFromMyPaths() {
-            showView('topics-view');
-            closeSidebar();
-        }
-
-        function viewRoadmapDetails(pathId) {
-            log('View roadmap details for path:', pathId);
-            alert('Bu özellik yakında eklenecek!');
+                </div>
+            `;
+            updateElementsTheme(state.theme);
         }
 
         // Check user status
         async function checkUserStatus() {
             try {
-                const data = await apiCall('/api/status');
-                const userNameEl = document.getElementById('user-name');
-                if (userNameEl) {
-                    userNameEl.textContent = data.logged_in ? data.username : 'Misafir';
-                }
-                log('User status:', data);
+                const data = await mockApiCall('/api/status');
+                document.getElementById('user-name').textContent = data.username;
             } catch (err) {
-                error('Error checking status:', err);
-                const userNameEl = document.getElementById('user-name');
-                if (userNameEl) {
-                    userNameEl.textContent = 'Misafir';
-                }
+                document.getElementById('user-name').textContent = 'Misafir';
             }
         }
 
         // Event handlers
         function setupEventHandlers() {
-            log('Setting up event handlers...');
-
-            // Navigation events
-            const openNavBtn = document.getElementById('open-nav');
-            const closeNavBtn = document.getElementById('close-nav');
-            const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-            if (openNavBtn) {
-                openNavBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openSidebar();
-                });
-                log('Open nav listener attached');
-            }
-
-            if (closeNavBtn) {
-                closeNavBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeSidebar();
-                });
-                log('Close nav listener attached');
-            }
-
-            if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeSidebar();
-                });
-                log('Sidebar overlay listener attached');
-            }
+            // Navigation
+            document.getElementById('open-nav')?.addEventListener('click', openSidebar);
+            document.getElementById('close-nav')?.addEventListener('click', closeSidebar);
+            document.getElementById('sidebar-overlay')?.addEventListener('click', closeSidebar);
 
             // Theme toggle
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const newTheme = learningState.theme === 'dark' ? 'light' : 'dark';
-                    setTheme(newTheme);
-                });
-                log('Theme toggle listener attached');
-            }
+            document.getElementById('theme-toggle')?.addEventListener('click', () => {
+                const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+            });
 
-            // Navigation menu events
-            const navTopics = document.getElementById('nav-topics');
-            const navMyPaths = document.getElementById('nav-my-paths');
-            const navProgress = document.getElementById('nav-progress');
+            // Navigation menu
+            document.getElementById('nav-topics')?.addEventListener('click', () => {
+                showView('topics-view');
+                closeSidebar();
+            });
 
-            if (navTopics) {
-                navTopics.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showView('topics-view');
-                    closeSidebar();
-                });
-                log('Nav topics listener attached');
-            }
+            document.getElementById('nav-my-paths')?.addEventListener('click', () => {
+                loadMyPaths();
+                showView('my-paths-view');
+                closeSidebar();
+            });
 
-            if (navMyPaths) {
-                navMyPaths.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    loadMyPaths();
-                    showView('my-paths-view');
-                    closeSidebar();
-                });
-                log('Nav my paths listener attached');
-            }
+            document.getElementById('nav-progress')?.addEventListener('click', () => {
+                loadProgress();
+                showView('progress-view');
+                closeSidebar();
+            });
 
-            if (navProgress) {
-                navProgress.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    loadProgress();
-                    showView('progress-view');
-                    closeSidebar();
-                });
-                log('Nav progress listener attached');
-            }
+            // Close buttons
+            document.getElementById('close-quiz')?.addEventListener('click', () => showView('topics-view'));
+            document.getElementById('close-roadmap')?.addEventListener('click', () => showView('topics-view'));
 
-            // Quiz modal events
-            const closeQuizBtn = document.getElementById('close-quiz');
-            const closeRoadmapBtn = document.getElementById('close-roadmap');
-            const generateRoadmapBtn = document.getElementById('generate-roadmap');
-
-            if (closeQuizBtn) {
-                closeQuizBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showView('topics-view');
-                });
-                log('Close quiz listener attached');
-            }
-
-            if (closeRoadmapBtn) {
-                closeRoadmapBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showView('topics-view');
-                });
-                log('Close roadmap listener attached');
-            }
-
-            if (generateRoadmapBtn) {
-                generateRoadmapBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    generateLearningPath();
-                });
-                log('Generate roadmap listener attached');
-            }
-
-            // Escape key to close sidebar
+            // ESC key
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && learningState.sidebarOpen) {
+                if (e.key === 'Escape' && state.sidebarOpen) {
                     closeSidebar();
                 }
             });
-
-            log('All event handlers set up successfully');
         }
 
-        // Initialize the application
-        function initApp() {
-            log('Initializing Learning Paths App...');
+        // Initialize
+        function init() {
+            log('Initializing...');
 
-            // Set initial theme
-            setTheme(learningState.theme);
-
-            // Setup event handlers
+            setTheme(state.theme);
             setupEventHandlers();
-
-            // Load initial data
-            log('Loading initial data...');
             loadTopics();
             checkUserStatus();
-
-            // Show initial view
             showView('topics-view');
 
-            log('App initialization complete!');
+            log('✅ Initialization complete');
         }
 
-        // Make functions globally available for onclick handlers
-        window.startQuiz = startQuiz;
-        window.selectAnswer = selectAnswer;
-        window.generateLearningPath = generateLearningPath;
-        window.showTopicsFromMyPaths = showTopicsFromMyPaths;
-        window.viewRoadmapDetails = viewRoadmapDetails;
-        window.loadTopics = loadTopics;
-        window.loadMyPaths = loadMyPaths;
-        window.loadProgress = loadProgress;
-
-        // Initialize when DOM is ready
+        // Start when ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
+            document.addEventListener('DOMContentLoaded', init);
         } else {
-            initApp();
+            init();
         }
 
-        log('Learning Paths script fully loaded!');
     </script>
 </body>
 </html>
