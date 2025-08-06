@@ -100,7 +100,6 @@
             transform: translateX(28px);
         }
 
-        #schema-container svg { width: 100%; height: auto; }
         .bg-debate-light { background-color: #ffffff; }
         .dark .bg-debate-light { background-color: #1f2937; }
         .card-bg { background-color: #f3f4f6; }
@@ -717,6 +716,7 @@
                     <div id="schema-screen" class="flex flex-col h-full">
                         <h2 data-lang-key="schemaTitle" class="text-3xl font-bold text-center bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-6">Argüman Haritası</h2>
                         <div id="schema-container" class="flex-grow bg-white dark:bg-gray-900 p-6 rounded-2xl overflow-auto border">
+                             <div id="mermaid-content"></div>
                         </div>
                         <div class="mt-6">
                             <button data-action="back-to-report" class="btn-primary w-full p-4 text-white rounded-xl font-bold transition-all">
@@ -726,16 +726,22 @@
                     </div>
                 `;
                 showScreen(html);
-                const schemaContainer = document.getElementById('schema-container');
+                const mermaidContent = document.getElementById('mermaid-content');
 
                 try {
                     if (schemaData && schemaData.schema) {
                         if (typeof mermaid !== 'undefined') {
                             mermaid.render('mermaid-graph', schemaData.schema).then(({svg}) => {
-                                schemaContainer.innerHTML = svg;
+                                mermaidContent.innerHTML = svg;
+                                const svgEl = mermaidContent.querySelector('svg');
+                                if (svgEl) {
+                                    svgEl.style.maxWidth = 'none';
+                                    svgEl.style.width = svgEl.viewBox.baseVal.width + 'px';
+                                    svgEl.style.height = svgEl.viewBox.baseVal.height + 'px';
+                                }
                             }).catch(error => {
                                 console.error("Mermaid render error:", error);
-                                schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
+                                mermaidContent.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
                             });
                         } else {
                             throw new Error("Mermaid library not loaded");
@@ -745,7 +751,7 @@
                     }
                 } catch (error) {
                     console.error("Schema render error:", error);
-                    schemaContainer.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
+                    mermaidContent.innerHTML = `<p class="text-red-500">${translations[state.lang].errorSchemaRender}</p><p class="text-xs text-subtle mt-2">${error.message}</p>`;
                 }
             }
 
@@ -1001,9 +1007,9 @@
                     setLoading(true, translations[state.lang].pdfLoading);
                     try {
                         if (!state.currentReport) {
-                             alert("PDF oluşturmak için önce bir rapor oluşturulmalıdır.");
-                             setLoading(false);
-                             return;
+                            alert("PDF oluşturmak için önce bir rapor oluşturulmalıdır.");
+                            setLoading(false);
+                            return;
                         }
 
                         const { jsPDF } = window.jspdf;

@@ -18,7 +18,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # API Configuration
-API_KEY = os.getenv("GOOGLE_API_KEY", "YOUR_API_KEY_HERE")
+API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyDVeO8QiLTgSV9AbQedlMtSN7LFVd1BWK4")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
 
 
@@ -100,7 +100,16 @@ prompts = {
           "iknaEdicilikPuani": 7,
           "genelYorum": "Genel performans yorumu"
         }}""",
-        'schema_system': "Aşağıdaki münazara geçmişine dayanarak mermaid.js formatında bir argüman haritası oluştur: {conversation_history}",
+        'schema_system': """Aşağıdaki münazara geçmişine dayanarak, mermaid.js `graph TD;` formatında bir argüman haritası oluştur.
+
+        ÖNEMLİ KURALLAR:
+        1. Sadece `graph TD;` ile başlayan geçerli bir mermaid.js şeması döndür.
+        2. Düğüm metinlerinde (node text) boşluk veya özel karakterler varsa, metnin tamamını çift tırnak içine al. Örnek: `A["Bu bir düğüm metnidir"] --> B["Bu da başka bir metin"]`.
+        3. Asla tırnak içinde olmayan ayrı metin parçaları bırakma. Örnek: `YANLIŞ: A["Metin" Parça]`, `DOĞRU: A["Metin Parçası"]`.
+        4. Çıktının başına veya sonuna "```mermaid" veya "```" gibi işaretler ekleme. Sadece saf şema kodunu döndür.
+
+        Münazara Geçmişi:
+        {conversation_history}""",
         'profile_system': "Aşağıdaki münazara özet verilerine dayanarak bir münazır profili analizi yap: {summary_data}",
         'quiz_system': """Konu: {topic}
 
@@ -166,7 +175,16 @@ prompts = {
         {conversation_history}
 
         Report format: (same as Turkish version)""",
-        'schema_system': "Create an argument map in mermaid.js format based on the following debate history: {conversation_history}",
+        'schema_system': """Based on the following debate history, create an argument map in mermaid.js `graph TD;` format.
+
+        IMPORTANT RULES:
+        1. Only return a valid mermaid.js diagram starting with `graph TD;`.
+        2. If node text contains spaces or special characters, enclose the entire text in double quotes. Example: `A["This is node text"] --> B["This is other text"]`.
+        3. Never leave separate unquoted text fragments. Example: `WRONG: A["Text" Fragment]`, `CORRECT: A["Text Fragment"]`.
+        4. Do not include markers like "```mermaid" or "```" at the beginning or end of the output. Return only the raw diagram code.
+
+        Debate History:
+        {conversation_history}""",
         'profile_system': "Based on the following summary data, perform a debater profile analysis: {summary_data}",
         'quiz_system': """Topic: {topic}
 
@@ -779,4 +797,4 @@ if __name__ == '__main__':
 
     # Run the application on port 5001 instead of 5000
     print("\n🚀 Starting Flask application on port 5001...")
-    app.run(debug=True, port=5001, host='0.0.0.0')
+    app.run(debug=True, port=5001, host='0.0.0.0') 
